@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextPaint;
@@ -20,7 +21,7 @@ import android.view.View;
  */
 public class SectionDecoration extends RecyclerView.ItemDecoration {
 
-	private SparseArray<String> mSecitonMap = new SparseArray<>();
+	private SparseArray<String> mSectionHeader = new SparseArray<>();
 	private int mSectionAreaHeight = 24;
 	private int mTextColor = Color.WHITE;
 	private Drawable mBgDrawable;
@@ -38,7 +39,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	}
 
 	public SectionDecoration(Context context, SparseArray<String> sectionMap) {
-		this.mSecitonMap = sectionMap;
+		this.mSectionHeader = sectionMap;
 		this.mContext = context.getApplicationContext();
 		mBgDrawable = new ColorDrawable(Color.GRAY);
 
@@ -76,7 +77,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	 * @param bgDrawable
 	 * @return
 	 */
-	public SectionDecoration setSectionHeaderBackground(Drawable bgDrawable) {
+	public SectionDecoration setSectionHeaderBackground(@NonNull Drawable bgDrawable) {
 		this.mBgDrawable = bgDrawable;
 		return this;
 	}
@@ -114,7 +115,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
 		super.getItemOffsets(outRect, view, parent, state);
 		int position = ((RecyclerView.LayoutParams) view.getLayoutParams()).getViewAdapterPosition();
-		outRect.set(0, mSecitonMap.get(position) != null ? mSectionAreaHeight : 0, 0, 0);
+		outRect.set(0, mSectionHeader.get(position) != null ? mSectionAreaHeight : 0, 0, 0);
 	}
 
 	/**
@@ -135,8 +136,8 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 			final View child = parent.getChildAt(i);
 			final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
 			int position = params.getViewAdapterPosition();
-			if (mSecitonMap.get(position) != null) {
-				drawSectionArea(c, left, right, child, params, position);
+			if (mSectionHeader.get(position) != null) {
+				drawSectionArea(c, parent, left, right, child, params, position);
 			}
 		}
 	}
@@ -151,18 +152,19 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	 * @param params
 	 * @param position
 	 */
-	private void drawSectionArea(Canvas c, int left, int right, View child,
+	private void drawSectionArea(Canvas c, RecyclerView parent, int left, int right, View child,
 								 RecyclerView.LayoutParams params, int position) {
-		final int rectBottom = child.getTop() - params.topMargin;
-		// 绘制悬浮栏
-		//c.drawRect(left, rectBottom - mSectionAreaHeight, right, rectBottom, mPaint);
+		// rectBottom去掉其他decor的高度
+		int otherDecorBottomHeight = parent.getLayoutManager().getBottomDecorationHeight(child) >= 0 ? parent.getLayoutManager().getBottomDecorationHeight(child) : 0;
+		final int rectBottom = child.getTop() - params.topMargin - otherDecorBottomHeight;
 		Rect clipRect = new Rect(left, rectBottom - mSectionAreaHeight, right, rectBottom);
 		c.save();
+
 		c.clipRect(clipRect);
 		mBgDrawable.getBounds().set(clipRect);
 		mBgDrawable.draw(c);
 		// 垂直居中绘制文字
-		c.drawText(mSecitonMap.get(position), left + mSectionPaddingLeft,
+		c.drawText(mSectionHeader.get(position), left + mSectionPaddingLeft,
 				rectBottom - (mSectionAreaHeight - mTextHeight) / 2 - mTextBaselineOffset, mTextPaint);
 		c.restore();
 	}
@@ -196,7 +198,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 		String nextHeader = getSectionHeaderTag(firstVisPos + 1);
 		// 下一个 header 与 当前 header 不相等
 		if (nextHeader != null && !sectionHeader.equals(nextHeader)) {
-			//Log.e("better", String.format("childHeight: %s, childTop: %s, AreaHeight: %s", child.getHeight(), child.getTop(), mSectionAreaHeight));
+			// Log.e("better", String.format("childHeight: %s, childTop: %s, AreaHeight: %s", child.getHeight(), child.getTop(), mSectionAreaHeight));
 			if (child.getHeight() + child.getTop() < mSectionAreaHeight) {
 				c.save();
 				flag = true;
@@ -221,16 +223,16 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	}
 
 	/**
-	 * 不断往上找，获取 title
+	 * 取上一个 title
 	 *
 	 * @param position
 	 * @return
 	 */
 	private String getSectionHeaderTag(int position) {
-		// 不断往上找
+		// 往上找
 		while (position >= 0) {
-			if (mSecitonMap.get(position) != null) {
-				return mSecitonMap.get(position);
+			if (mSectionHeader.get(position) != null) {
+				return mSectionHeader.get(position);
 			}
 			position--;
 		}
