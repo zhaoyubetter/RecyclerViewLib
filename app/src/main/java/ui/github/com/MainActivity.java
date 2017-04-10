@@ -10,11 +10,12 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-import ui.github.com.ui.FloatHeaderActivity;
-import ui.github.com.ui.ItemTypeDivideActivity;
 import ui.github.com.library.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.base.BaseRecyclerViewHolder;
-import ui.github.com.library.base.Divider;
+import ui.github.com.library.decoration.Divider;
+import ui.github.com.ui.FloatHeader2Activity;
+import ui.github.com.ui.FloatHeaderActivity;
+import ui.github.com.ui.ItemTypeDivideActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
 	private void initData() {
 		datas.add(new ModelBean("条目与分割线", ItemTypeDivideActivity.class.getName()));
-		datas.add(new ModelBean("悬浮标题实现1", FloatHeaderActivity.class.getName()));
+		datas.add(new ModelBean("悬浮标题实现1(添加布局)", FloatHeaderActivity.class.getName()));
+		datas.add(new ModelBean("悬浮标题实现2(decoration)", FloatHeader2Activity.class.getName()));
 		adapter.replaceData(datas);
 	}
 

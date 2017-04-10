@@ -1,7 +1,5 @@
 package ui.github.com.ui;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,8 +54,8 @@ public class FloatHeader2Activity extends AppCompatActivity {
 		// 4.添加分割线
 		//mRecyclerView.addItemDecoration(new Divider(null, LinearLayoutManager.VERTICAL));
 		SectionDecoration sectionDecoration = new SectionDecoration(getApplicationContext(), mScetionArray);
-		sectionDecoration.setSectionPaddingLeft(100).setSectionHeaderBackground(new ColorDrawable(Color.RED));
-		mRecyclerView.addItemDecoration(new Divider(null, LinearLayoutManager.VERTICAL));
+		sectionDecoration.setSectionPaddingLeft(100);
+		mRecyclerView.addItemDecoration(new Divider(getDrawable(R.drawable.shape_section_bg), LinearLayoutManager.VERTICAL));
 		mRecyclerView.addItemDecoration(sectionDecoration);
 		mAdapter.replaceData(mData);
 	}

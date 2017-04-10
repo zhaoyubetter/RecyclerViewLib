@@ -17,8 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.ItemTypeDivideActivity"/>
-        <activity android:name=".ui.FloatHeaderActivity">
-        </activity>
+        <activity android:name=".ui.FloatHeaderActivity"/>
+        <activity android:name=".ui.FloatHeader2Activity"/>
     </application>
 
 </manifest>
