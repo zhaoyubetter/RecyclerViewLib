@@ -16,26 +16,38 @@ import ui.github.com.library.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.base.BaseRecyclerViewHolder;
 
 /**
- * 加载更多
+ * 加载更多抽象基类
  *
- * @param <T>
+ * @param
  */
 public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAdapter<T> {
 
 	public static final int ITEM_TYPE_FOOTER = Integer.MIN_VALUE >> 2;
 
+	/**
+	 * 不可见状态
+	 */
 	public static final int STATE_INVISIBLE = 0;
 	/**
 	 * 自动加载
 	 */
 	public static final int STATE_LOADING = 1;
-	public static final int STATE_NO_MORE = 2;
+	/**
+	 * 没有更多数据
+	 */
+	public static final int STATE_LOAD_COMPLETE = 2;
+	/**
+	 * 加载无数据
+	 */
 	public static final int STATE_NO_DATA = 3;
+	/**
+	 * 加载失败
+	 */
+	public static final int STATE_LOAD_FAIL = 5;
 	/**
 	 * 手动加载
 	 */
 	public static final int STATE_LOAD_BY_USER = 4;
-	public static final int STATE_LOAD_FAIL = 5;
 
 
 	/**
@@ -60,7 +72,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	private RetryListener mRetryListener = new RetryListener();
 
 	/**
-	 * 下拉刷新组件
+	 * 下拉刷新组件，配合下拉刷新使用
 	 */
 	protected SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -83,16 +95,6 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 			return ITEM_TYPE_FOOTER;
 		}
 		return super.getItemViewType(position);
-	}
-
-	/**
-	 * 触发加载更多
-	 */
-	private void autoLoadMore() {
-		// 3.判断是否是上拉加载
-		if (!mIsLoading && !mIsLoadedAll && state != STATE_LOAD_BY_USER) {
-			performLoadMore();
-		}
 	}
 
 	@Override
@@ -192,6 +194,44 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	}
 
 	/**
+	 * 加载完成时，or 失败时，调用此方法还原状态
+	 */
+	public void setStateLoadedAuto() {
+		mIsLoading = false;
+		mIsLoadedAll = false;
+		this.setState(STATE_LOADING);
+		resetSwipe();
+	}
+
+	/**
+	 * 加载完成时，or 失败时，调用此方法还原状态
+	 */
+	public void setStateLoadedByUser() {
+		mIsLoading = false;
+		mIsLoadedAll = false;
+		this.setState(STATE_LOAD_BY_USER);
+		resetSwipe();
+	}
+
+	/**
+	 * 加载了全部数据,调用此方法，就不允许再加载数据
+	 */
+	public void setStateLoadedAll() {
+		mIsLoading = false;
+		mIsLoadedAll = true;
+		this.setState(STATE_LOAD_COMPLETE);
+		resetSwipe();
+	}
+
+	/**
+	 * 加载失败了，可点击重试
+	 */
+	public void setStateLoadedFail() {
+		this.setState(STATE_LOAD_FAIL);
+		resetSwipe();
+	}
+
+	/**
 	 * 获取最后可见item
 	 *
 	 * @return
@@ -223,41 +263,13 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	}
 
 	/**
-	 * 加载完成时，or 失败时，调用此方法还原状态
+	 * 触发加载更多
 	 */
-	public void setStateLoadedAuto() {
-		mIsLoading = false;
-		mIsLoadedAll = false;
-		this.setState(STATE_LOADING);
-		resetSwipe();
-	}
-
-	/**
-	 * 加载完成时，or 失败时，调用此方法还原状态
-	 */
-	public void setStateLoadedByUser() {
-		mIsLoading = false;
-		mIsLoadedAll = false;
-		this.setState(STATE_LOAD_BY_USER);
-		resetSwipe();
-	}
-
-	/**
-	 * 加载了全部数据,调用此方法，就不允许再加载数据
-	 */
-	public void setStateLoadedAll() {
-		mIsLoading = false;
-		mIsLoadedAll = true;
-		this.setState(STATE_NO_MORE);
-		resetSwipe();
-	}
-
-	/**
-	 * 加载失败了，可点击重试
-	 */
-	public void setStateLoadedFail() {
-		this.setState(STATE_LOAD_FAIL);
-		resetSwipe();
+	private void autoLoadMore() {
+		// 3.判断是否是上拉加载
+		if (!mIsLoading && !mIsLoadedAll && state != STATE_LOAD_BY_USER) {
+			performLoadMore();
+		}
 	}
 
 	public void addItems(List<T> items) {
@@ -286,7 +298,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 			case STATE_LOADING:
 				footerView.setLoadingState();
 				break;
-			case STATE_NO_MORE:
+			case STATE_LOAD_COMPLETE:
 				footerView.setNoMoreState();
 				break;
 			case STATE_NO_DATA:

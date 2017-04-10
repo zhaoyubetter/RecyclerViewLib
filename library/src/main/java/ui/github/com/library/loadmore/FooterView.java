@@ -26,7 +26,6 @@ public class FooterView extends LinearLayout {
 		init();
 	}
 
-
 	public void init() {
 		this.setOrientation(HORIZONTAL);
 		this.setGravity(Gravity.CENTER);
@@ -91,36 +90,8 @@ public class FooterView extends LinearLayout {
 
 	// ==========  各种状态  ==========
 
-	public void setText(CharSequence s) {
-		textView.setText(s);
-	}
-
-	public void setTextColor(int color) {
-		textView.setTextColor(color);
-	}
-
-	public void setTextSize(float size) {
-		textView.setTextSize(size);
-	}
-
-	public ProgressBar getProgressBar() {
-		return progressBar;
-	}
-
 	public void setInVisibleState() {
 		this.setVisibility(View.GONE);
-	}
-
-	public void setLoadingText(String loadingText) {
-		this.loadingText = loadingText;
-	}
-
-	public void setNoMoreText(String noMoreText) {
-		this.noMoreText = noMoreText;
-	}
-
-	public void setNoDataText(String noDataText) {
-		this.noDataText = noDataText;
 	}
 
 	public int dip2px(float dpValue) {
