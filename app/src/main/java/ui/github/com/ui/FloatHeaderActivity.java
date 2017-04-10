@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,7 +14,7 @@ import java.util.List;
 import ui.github.com.R;
 import ui.github.com.library.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.base.BaseRecyclerViewHolder;
-import ui.github.com.library.base.Divider;
+import ui.github.com.library.decoration.Divider;
 
 
 public class FloatHeaderActivity extends AppCompatActivity {
@@ -45,7 +46,6 @@ public class FloatHeaderActivity extends AppCompatActivity {
 			}
 		}
 
-
 		// 1.创建RecyclerView对象
 		mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 		// 2.设置显示规则
@@ -75,6 +75,7 @@ public class FloatHeaderActivity extends AppCompatActivity {
 					linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 				}
 
+
 				View view = linearLayoutManager.findViewByPosition(mCurrPos + 1);
 				if (view != null && linearLayoutManager.getItemViewType(view) == CurrentAdapter.TYPE_TITLE) {
 					if (view.getTop() <= mHeaderItemHeight) {
@@ -85,23 +86,31 @@ public class FloatHeaderActivity extends AppCompatActivity {
 					}
 				}
 
-				// 比较重要
+				// 更新 mCurrPos
 				if (mCurrPos != linearLayoutManager.findFirstVisibleItemPosition()) {
+					Log.e(TAG, mCurrPos + " , " + linearLayoutManager.findFirstVisibleItemPosition());
 					mCurrPos = linearLayoutManager.findFirstVisibleItemPosition();
 					float_title_view.setY(0);
 					updateFloatTitle();
 				}
 			}
 		});
-
 		updateFloatTitle();
 	}
 
 	private void updateFloatTitle() {
 		TextView tv = (TextView) float_title_view.findViewById(R.id.name);
-		if (mData.get(mCurrPos).type == CurrentAdapter.TYPE_TITLE) {
-			tv.setText(mData.get(mCurrPos).name);
+		int pos = mCurrPos;
+		String title = "";
+		// 往上找
+		while (pos >= 0) {
+			if (mData.get(pos).type == CurrentAdapter.TYPE_TITLE) {
+				title = mData.get(pos).name;
+				break;
+			}
+			pos--;
 		}
+		tv.setText(title);
 	}
 
 	/**
