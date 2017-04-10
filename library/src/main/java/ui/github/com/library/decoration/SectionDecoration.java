@@ -42,7 +42,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 		this.mContext = context.getApplicationContext();
 		mBgDrawable = new ColorDrawable(Color.GRAY);
 
-		mPaint = new Paint();
+		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mPaint.setColor(Color.GRAY);
 		mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
@@ -119,6 +119,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 
 	/**
 	 * 在绘制itemView之前绘制我们需要的内容
+	 * 滑动就执行
 	 *
 	 * @param c
 	 * @param parent
@@ -140,6 +141,16 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 		}
 	}
 
+	/**
+	 * section header
+	 *
+	 * @param c
+	 * @param left
+	 * @param right
+	 * @param child
+	 * @param params
+	 * @param position
+	 */
 	private void drawSectionArea(Canvas c, int left, int right, View child,
 								 RecyclerView.LayoutParams params, int position) {
 		final int rectBottom = child.getTop() - params.topMargin;
@@ -157,7 +168,10 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	}
 
 	/**
+	 * draw float section header
+	 * <p>
 	 * 在绘制itemView之后绘制，具体表现形式，就是绘制的内容在itemview上层。
+	 * 滑动，就执行
 	 *
 	 * @param c
 	 * @param parent
@@ -167,6 +181,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 	public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
 		super.onDrawOver(c, parent, state);
 		final int firstVisPos = ((LinearLayoutManager) parent.getLayoutManager()).findFirstVisibleItemPosition();
+		// 第一个可见条目 pos
 		if (firstVisPos == RecyclerView.NO_POSITION) {
 			return;
 		}
@@ -177,16 +192,20 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 		}
 
 		boolean flag = false;
-		String sectionHeader2 = getSectionHeaderTag(firstVisPos + 1);
-		if (sectionHeader2 != null && !sectionHeader.equals(sectionHeader2)) {
+
+		String nextHeader = getSectionHeaderTag(firstVisPos + 1);
+		// 下一个 header 与 当前 header 不相等
+		if (nextHeader != null && !sectionHeader.equals(nextHeader)) {
+			//Log.e("better", String.format("childHeight: %s, childTop: %s, AreaHeight: %s", child.getHeight(), child.getTop(), mSectionAreaHeight));
 			if (child.getHeight() + child.getTop() < mSectionAreaHeight) {
 				c.save();
 				flag = true;
+				// 这里实现上一个悬浮头的推动效果
 				c.translate(0, child.getHeight() + child.getTop() - mSectionAreaHeight);
 			}
 		}
 
-		// 裁剪
+		// 悬浮
 		Rect clipRect = new Rect(parent.getPaddingLeft(), parent.getPaddingTop(),
 				parent.getRight() - parent.getPaddingRight(), parent.getPaddingTop() + mSectionAreaHeight);
 		c.clipRect(clipRect);
@@ -201,6 +220,12 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
 		}
 	}
 
+	/**
+	 * 不断往上找，获取 title
+	 *
+	 * @param position
+	 * @return
+	 */
 	private String getSectionHeaderTag(int position) {
 		// 不断往上找
 		while (position >= 0) {

@@ -22,6 +22,12 @@ public class Divider extends RecyclerView.ItemDecoration {
 
 	private int mOrientation;
 
+	/**
+	 * 分割线 drawable
+	 *
+	 * @param divider     can be null,if null then use default
+	 * @param orientation
+	 */
 	public Divider(Drawable divider, int orientation) {
 		setDivider(divider);
 		setOrientation(orientation);
