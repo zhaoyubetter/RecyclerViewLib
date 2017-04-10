@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+@Deprecated
 public class FooterView extends LinearLayout {
 	protected String loadingText = "加载中…";
 	protected String noMoreText = "已加载全部";

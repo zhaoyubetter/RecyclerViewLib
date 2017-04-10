@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="36dp">
+
+    <!-- auto load more view -->
+    <RelativeLayout
+        android:id="@+id/load_more_auto_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <ProgressBar
+            android:id="@+id/simpleprogress"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Small.Inverse"
+            android:layout_width="25dp"
+            android:layout_height="25dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="12dp"
+            android:layout_toRightOf="@+id/simpleprogress"
+            android:text="加载中..."
+            android:textColor="#68000000"
+            android:textSize="14sp"/>
+    </RelativeLayout>
+
+    <!-- load fail view -->
+    <TextView
+        android:id="@+id/load_more_load_fail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="加载失败，点击重试"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+    <!-- load no data view -->
+    <TextView
+        android:id="@+id/load_more_load_no_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="暂无内容"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+    <!-- load complete data view -->
+    <TextView
+        android:id="@+id/load_more_load_complete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="已加载全部数据"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+    <!-- load complete data view -->
+    <TextView
+        android:id="@+id/load_more_by_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="加载更多"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+</RelativeLayout>

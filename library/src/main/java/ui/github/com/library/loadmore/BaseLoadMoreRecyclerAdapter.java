@@ -15,6 +15,12 @@ import java.util.List;
 import ui.github.com.library.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.base.BaseRecyclerViewHolder;
 
+import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOADING;
+import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_BY_USER;
+import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_COMPLETE;
+import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_FAIL;
+import static ui.github.com.library.loadmore.LoadMoreView.STATE_NO_DATA;
+
 /**
  * 加载更多抽象基类
  *
@@ -24,37 +30,6 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 
 	public static final int ITEM_TYPE_FOOTER = Integer.MIN_VALUE >> 2;
 
-	/**
-	 * 不可见状态
-	 */
-	public static final int STATE_INVISIBLE = 0;
-	/**
-	 * 自动加载
-	 */
-	public static final int STATE_LOADING = 1;
-	/**
-	 * 没有更多数据
-	 */
-	public static final int STATE_LOAD_COMPLETE = 2;
-	/**
-	 * 加载无数据
-	 */
-	public static final int STATE_NO_DATA = 3;
-	/**
-	 * 加载失败
-	 */
-	public static final int STATE_LOAD_FAIL = 5;
-	/**
-	 * 手动加载
-	 */
-	public static final int STATE_LOAD_BY_USER = 4;
-
-
-	/**
-	 * 当前状态
-	 */
-	protected int state = STATE_LOAD_BY_USER;
-	protected FooterView footerView;
 	private OnLoadMoreListener pullUpListener;
 
 	/**
@@ -81,10 +56,15 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	 */
 	private RecyclerView mRecyclerView;
 
+	/**
+	 * 加载更多
+	 */
+	private LoadMoreView mLoadMoreView;
+
 	public BaseLoadMoreRecyclerAdapter(@NonNull RecyclerView recyclerView, List<T> datas) {
 		super(datas);
 		this.mRecyclerView = recyclerView;
-		footerView = new FooterView(recyclerView.getContext());
+		mLoadMoreView = new SimpleLoadMoreView();
 	}
 
 	@CallSuper
@@ -100,8 +80,9 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	@Override
 	public BaseRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		if (viewType == ITEM_TYPE_FOOTER) {
-			refreshFooterView();
-			return new BaseRecyclerViewHolder(footerView);
+			BaseRecyclerViewHolder holder = BaseRecyclerViewHolder.getViewHolder(parent.getContext(), mLoadMoreView.getLayoutId(), parent);
+			mLoadMoreView.convert(holder);
+			return holder;
 		}
 		return super.onCreateViewHolder(parent, viewType);
 	}
@@ -112,7 +93,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 			// 因为已经在footerview写死了，所以这里就不用再去设置
 			// 没有数据的时候也不显示footer
 			if (position == 0) {
-				getFooterView().setVisibility(View.INVISIBLE);
+				mLoadMoreView.getLoadView().setVisibility(View.INVISIBLE);
 			}
 		} else {
 			super.onBindViewHolder(holder, position);
@@ -168,10 +149,6 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 		return super.getItemCount() + 1;
 	}
 
-	public FooterView getFooterView() {
-		return footerView;
-	}
-
 	/**
 	 * 删除条目时，判断最后一个条目是否可见，如果可见设置上拉加载方式为手动加载
 	 *
@@ -181,7 +158,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	public void removeItemAt(int position) {
 		super.removeItemAt(position);
 		if (getLastVisiblePosition() + 1 == getItemCount()) {
-			setState(STATE_LOAD_BY_USER);
+			setLoadViewState(STATE_LOAD_BY_USER);
 		}
 	}
 
@@ -189,7 +166,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	public void removeItems(List<T> items) {
 		super.removeItems(items);
 		if (getLastVisiblePosition() + 1 == getItemCount()) {
-			setState(STATE_LOAD_BY_USER);
+			setLoadViewState(STATE_LOAD_BY_USER);
 		}
 	}
 
@@ -199,7 +176,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	public void setStateLoadedAuto() {
 		mIsLoading = false;
 		mIsLoadedAll = false;
-		this.setState(STATE_LOADING);
+		this.setLoadViewState(LoadMoreView.STATE_LOADING);
 		resetSwipe();
 	}
 
@@ -209,7 +186,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	public void setStateLoadedByUser() {
 		mIsLoading = false;
 		mIsLoadedAll = false;
-		this.setState(STATE_LOAD_BY_USER);
+		this.setLoadViewState(STATE_LOAD_BY_USER);
 		resetSwipe();
 	}
 
@@ -219,7 +196,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	public void setStateLoadedAll() {
 		mIsLoading = false;
 		mIsLoadedAll = true;
-		this.setState(STATE_LOAD_COMPLETE);
+		this.setLoadViewState(STATE_LOAD_COMPLETE);
 		resetSwipe();
 	}
 
@@ -227,7 +204,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	 * 加载失败了，可点击重试
 	 */
 	public void setStateLoadedFail() {
-		this.setState(STATE_LOAD_FAIL);
+		this.setLoadViewState(STATE_LOAD_FAIL);
 		resetSwipe();
 	}
 
@@ -257,9 +234,22 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 		setStateLoadedByUser();
 	}
 
-	private void setState(int state) {
-		this.state = state;
-		refreshFooterView();
+	private void setLoadViewState(int state) {
+		mLoadMoreView.setLoadState(state);
+
+		// 设置点击事件
+		mLoadMoreView.getLoadView().setOnClickListener(null);
+		switch (state) {
+			case STATE_NO_DATA:
+				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
+				break;
+			case STATE_LOAD_FAIL:
+				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
+				break;
+			case STATE_LOAD_BY_USER:
+				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
+				break;
+		}
 	}
 
 	/**
@@ -267,7 +257,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	 */
 	private void autoLoadMore() {
 		// 3.判断是否是上拉加载
-		if (!mIsLoading && !mIsLoadedAll && state != STATE_LOAD_BY_USER) {
+		if (!mIsLoading && !mIsLoadedAll && mLoadMoreView.getLoadState() != STATE_LOAD_BY_USER) {
 			performLoadMore();
 		}
 	}
@@ -284,36 +274,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	private void resetSwipe() {
 		if (mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing()) {
 			mSwipeRefreshLayout.setRefreshing(false);
-			setState(STATE_LOAD_BY_USER);        // 设置为默认，需要手动加载，避免一些问题
-		}
-	}
-
-
-	private void refreshFooterView() {
-		footerView.setOnClickListener(null);
-		switch (state) {
-			case STATE_INVISIBLE:
-				footerView.setInVisibleState();
-				break;
-			case STATE_LOADING:
-				footerView.setLoadingState();
-				break;
-			case STATE_LOAD_COMPLETE:
-				footerView.setNoMoreState();
-				break;
-			case STATE_NO_DATA:
-				footerView.setNoDataState();
-				footerView.setOnClickListener(mRetryListener);
-				break;
-			case STATE_LOAD_FAIL:
-				footerView.setLoadFailState();
-				footerView.setOnClickListener(mRetryListener);
-				break;
-			case STATE_LOAD_BY_USER:
-				footerView.setDefaultState();
-				footerView.setOnClickListener(mRetryListener);
-				break;
-
+			setLoadViewState(STATE_LOAD_BY_USER);        // 设置为默认，需要手动加载，避免一些问题
 		}
 	}
 
@@ -347,7 +308,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	private void performLoadMore() {
 		if (pullUpListener != null) {
 			mIsLoading = true;
-			setState(STATE_LOADING); // 设置状态加载中
+			setLoadViewState(STATE_LOADING); // 设置状态加载中
 			pullUpListener.onLoadMore();
 		}
 	}
@@ -368,7 +329,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	private class RetryListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			setState(STATE_LOADING);
+			setLoadViewState(STATE_LOADING);
 			performLoadMore();
 		}
 	}
