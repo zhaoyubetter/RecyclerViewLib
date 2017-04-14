@@ -18,6 +18,7 @@ import ui.github.com.library.decoration.Divider;
 import ui.github.com.ui.loadmore.LoadMoreTest1Activity;
 import ui.github.com.ui.loadmore.LoadMoreTest2Activity;
 import ui.github.com.ui.loadmore.LoadMoreTest3Activity;
+import ui.github.com.ui.loadmore.LoadMoreTest4Activity;
 
 
 /**
@@ -44,6 +45,7 @@ public class LoadMoreActivity extends AppCompatActivity {
 		data.add("加载更多-无限数据集");
 		data.add("加载更多-有限数据集");
 		data.add("加载更多-自定义加载View");
+		data.add("删除自动设置oadView状态");
 		SimpleAdapter adapter = new SimpleAdapter(data);
 		adapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<String>() {
 			@Override
@@ -56,6 +58,9 @@ public class LoadMoreActivity extends AppCompatActivity {
 					startActivity(intent);
 				} else if (position == 2) {
 					Intent intent = new Intent(getApplicationContext(), LoadMoreTest3Activity.class);
+					startActivity(intent);
+				} else if (position == 3) {
+					Intent intent = new Intent(getApplicationContext(), LoadMoreTest4Activity.class);
 					startActivity(intent);
 				}
 			}
