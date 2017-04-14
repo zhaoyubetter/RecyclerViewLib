@@ -15,6 +15,7 @@ import java.util.List;
 import ui.github.com.library.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.base.BaseRecyclerViewHolder;
 
+import static ui.github.com.library.loadmore.LoadMoreView.STATE_INVISIBLE;
 import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOADING;
 import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_BY_USER;
 import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_COMPLETE;
@@ -81,7 +82,7 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	public BaseRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		if (viewType == ITEM_TYPE_FOOTER) {
 			BaseRecyclerViewHolder holder = BaseRecyclerViewHolder.getViewHolder(parent.getContext(), mLoadMoreView.getLayoutId(), parent);
-			mLoadMoreView.convert(holder);
+			mLoadMoreView.initLoadView(holder);
 			return holder;
 		}
 		return super.onCreateViewHolder(parent, viewType);
@@ -90,13 +91,166 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 	@Override
 	public void onBindViewHolder(BaseRecyclerViewHolder holder, int position) {
 		if (position == getItemCount() - 1) {
-			// 因为已经在footerview写死了，所以这里就不用再去设置
-			// 没有数据的时候也不显示footer
-			if (position == 0) {
-				mLoadMoreView.getLoadView().setVisibility(View.INVISIBLE);
+			// loadmoreView写死了，这里不用再去设置
+			// 没有数据的时候设置为默认状态，加载更多
+			if (position == 0) {  // the first time come to page the position is zero
+				this.setLoadViewState(STATE_INVISIBLE);
 			}
 		} else {
 			super.onBindViewHolder(holder, position);
+		}
+	}
+
+
+	/**
+	 * 加载完成时，or 失败时，调用此方法还原状态
+	 */
+	public void setStateLoadedAuto() {
+		mIsLoading = false;
+		mIsLoadedAll = false;
+		this.setLoadViewState(LoadMoreView.STATE_LOADING);
+		resetSwipe();
+	}
+
+	/**
+	 * 加载完成时，or 失败时，调用此方法还原状态
+	 */
+	public void setStateLoadedByUser() {
+		mIsLoading = false;
+		mIsLoadedAll = false;
+		this.setLoadViewState(STATE_LOAD_BY_USER);
+		resetSwipe();
+	}
+
+	/**
+	 * 加载了全部数据,调用此方法，就不允许再加载数据
+	 */
+	public void setStateLoadedAll() {
+		mIsLoading = false;
+		mIsLoadedAll = true;
+		this.setLoadViewState(STATE_LOAD_COMPLETE);
+		resetSwipe();
+	}
+
+	/**
+	 * 加载失败了，可点击重试
+	 */
+	public void setStateLoadedFail() {
+		this.setLoadViewState(STATE_LOAD_FAIL);
+		resetSwipe();
+	}
+
+	/**
+	 * 获取最后可见item
+	 *
+	 * @return
+	 */
+	protected int getLastVisiblePosition() {
+		RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+		if (layoutManager != null) {
+			if (layoutManager instanceof LinearLayoutManager) {
+				return ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
+			} else if (layoutManager instanceof GridLayoutManager) {
+				return ((GridLayoutManager) layoutManager).findLastVisibleItemPosition();
+			} else if (layoutManager instanceof StaggeredGridLayoutManager) {
+				StaggeredGridLayoutManager staggeredGridLayoutManager = (StaggeredGridLayoutManager) layoutManager;
+				return findMax(staggeredGridLayoutManager.findLastVisibleItemPositions(new int[staggeredGridLayoutManager.getSpanCount()]));
+
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * set custom load more view
+	 *
+	 * @param loadMore
+	 */
+	public void setLoadMore(LoadMoreView loadMore) {
+		this.mLoadMoreView = loadMore;
+	}
+
+	public void clearData() {
+		super.clearData();
+		setStateLoadedByUser();
+	}
+
+	private void setLoadViewState(int state) {
+		mLoadMoreView.setLoadState(state);
+
+		// 设置点击事件
+		mLoadMoreView.getLoadView().setOnClickListener(null);
+		switch (state) {
+			case STATE_NO_DATA:
+				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
+				break;
+			case STATE_LOAD_FAIL:
+				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
+				break;
+			case STATE_LOAD_BY_USER:
+				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
+				break;
+		}
+	}
+
+	/**
+	 * 触发加载更多
+	 */
+	private void autoLoadMore() {
+		// 3.判断是否是上拉加载
+		if (!mIsLoading && !mIsLoadedAll && mLoadMoreView.getLoadState() != STATE_LOAD_BY_USER) {
+			performLoadMore();
+		}
+	}
+
+	/**
+	 * 设置下拉刷新组件
+	 *
+	 * @param swipe
+	 */
+	public void setSwipeRefreshLayout(SwipeRefreshLayout swipe) {
+		mSwipeRefreshLayout = swipe;
+	}
+
+	private void resetSwipe() {
+		if (mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing()) {
+			mSwipeRefreshLayout.setRefreshing(false);
+			setLoadViewState(STATE_LOAD_BY_USER);        // 设置为默认，需要手动加载，避免一些问题
+		}
+	}
+
+	public boolean isLoading() {
+		return mIsLoading;
+	}
+
+	public boolean isLoadedAll() {
+		return mIsLoadedAll;
+	}
+
+	/**
+	 * 滚动到底部时的监听器
+	 *
+	 * @param l
+	 */
+	public void setOnLoadMoreListener(OnLoadMoreListener l) {
+		this.pullUpListener = l;
+	}
+
+	/**
+	 * 滚动到底部时的监听器
+	 */
+	public interface OnLoadMoreListener {
+		void onLoadMore();
+	}
+
+	/**
+	 * 执行加载更多请求
+	 */
+	private void performLoadMore() {
+		if (pullUpListener != null) {
+			mIsLoading = true;
+			setLoadViewState(STATE_LOADING); // 设置状态加载中
+			pullUpListener.onLoadMore();
 		}
 	}
 
@@ -170,147 +324,10 @@ public abstract class BaseLoadMoreRecyclerAdapter<T> extends BaseRecyclerViewAda
 		}
 	}
 
-	/**
-	 * 加载完成时，or 失败时，调用此方法还原状态
-	 */
-	public void setStateLoadedAuto() {
-		mIsLoading = false;
-		mIsLoadedAll = false;
-		this.setLoadViewState(LoadMoreView.STATE_LOADING);
-		resetSwipe();
-	}
-
-	/**
-	 * 加载完成时，or 失败时，调用此方法还原状态
-	 */
-	public void setStateLoadedByUser() {
-		mIsLoading = false;
-		mIsLoadedAll = false;
-		this.setLoadViewState(STATE_LOAD_BY_USER);
-		resetSwipe();
-	}
-
-	/**
-	 * 加载了全部数据,调用此方法，就不允许再加载数据
-	 */
-	public void setStateLoadedAll() {
-		mIsLoading = false;
-		mIsLoadedAll = true;
-		this.setLoadViewState(STATE_LOAD_COMPLETE);
-		resetSwipe();
-	}
-
-	/**
-	 * 加载失败了，可点击重试
-	 */
-	public void setStateLoadedFail() {
-		this.setLoadViewState(STATE_LOAD_FAIL);
-		resetSwipe();
-	}
-
-	/**
-	 * 获取最后可见item
-	 *
-	 * @return
-	 */
-	protected int getLastVisiblePosition() {
-		RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
-		if (layoutManager != null) {
-			if (layoutManager instanceof LinearLayoutManager) {
-				return ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
-			} else if (layoutManager instanceof GridLayoutManager) {
-				return ((GridLayoutManager) layoutManager).findLastVisibleItemPosition();
-			} else if (layoutManager instanceof StaggeredGridLayoutManager) {
-				StaggeredGridLayoutManager staggeredGridLayoutManager = (StaggeredGridLayoutManager) layoutManager;
-				return findMax(staggeredGridLayoutManager.findLastVisibleItemPositions(new int[staggeredGridLayoutManager.getSpanCount()]));
-
-			}
-		}
-		return 0;
-	}
-
-	public void clearData() {
-		super.clearData();
-		setStateLoadedByUser();
-	}
-
-	private void setLoadViewState(int state) {
-		mLoadMoreView.setLoadState(state);
-
-		// 设置点击事件
-		mLoadMoreView.getLoadView().setOnClickListener(null);
-		switch (state) {
-			case STATE_NO_DATA:
-				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
-				break;
-			case STATE_LOAD_FAIL:
-				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
-				break;
-			case STATE_LOAD_BY_USER:
-				mLoadMoreView.getLoadView().setOnClickListener(mRetryListener);
-				break;
-		}
-	}
-
-	/**
-	 * 触发加载更多
-	 */
-	private void autoLoadMore() {
-		// 3.判断是否是上拉加载
-		if (!mIsLoading && !mIsLoadedAll && mLoadMoreView.getLoadState() != STATE_LOAD_BY_USER) {
-			performLoadMore();
-		}
-	}
-
+	@Override
 	public void addItems(List<T> items) {
 		super.addItems(items);
-		setStateLoadedAuto();
-	}
-
-	public void setSwipeRefreshLayout(SwipeRefreshLayout swipe) {
-		mSwipeRefreshLayout = swipe;
-	}
-
-	private void resetSwipe() {
-		if (mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing()) {
-			mSwipeRefreshLayout.setRefreshing(false);
-			setLoadViewState(STATE_LOAD_BY_USER);        // 设置为默认，需要手动加载，避免一些问题
-		}
-	}
-
-	public boolean isLoading() {
-		return mIsLoading;
-	}
-
-	public boolean isLoadedAll() {
-		return mIsLoadedAll;
-	}
-
-	/**
-	 * 滚动到底部时的监听器
-	 *
-	 * @param l
-	 */
-	public void setOnLoadMoreListener(OnLoadMoreListener l) {
-		this.pullUpListener = l;
-	}
-
-	/**
-	 * 滚动到底部时的监听器
-	 */
-	public interface OnLoadMoreListener {
-		void onLoadMore();
-	}
-
-	/**
-	 * 执行加载更多请求
-	 */
-	private void performLoadMore() {
-		if (pullUpListener != null) {
-			mIsLoading = true;
-			setLoadViewState(STATE_LOADING); // 设置状态加载中
-			pullUpListener.onLoadMore();
-		}
+		setStateLoadedAuto();        // 一般自动加载多，这里设置为自动加载
 	}
 
 	private int findMax(int[] lastPositions) {

@@ -1,5 +1,7 @@
 package ui.github.com.ui.loadmore;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
@@ -19,23 +21,30 @@ import ui.github.com.library.loadmore.BaseLoadMoreRecyclerAdapter;
 import static ui.github.com.R.id.recyclerView;
 
 /**
- * 加载更多测试1
+ * 加载更多测试3 - 自定义加载尾
  */
-public class LoadMoreTest1Activity extends AppCompatActivity {
+public class LoadMoreTest3Activity extends AppCompatActivity {
 
 	private RecyclerView mRecycler;
 	private int mCurrentPage = 1;
 	private BaseLoadMoreRecyclerAdapter mLoadMoreAdapter;
-	private boolean isAuto = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setTitle("加载更多");
+		setTitle("加载更多-自定义加载View");
 		setContentView(R.layout.activity_load_more1);
 		mRecycler = (RecyclerView) findViewById(recyclerView);
 		mRecycler.setLayoutManager(new LinearLayoutManager(this));
-		mRecycler.addItemDecoration(new Divider(null, LinearLayoutManager.VERTICAL));
+		Divider divider = new Divider(null, LinearLayoutManager.VERTICAL);
+		divider.setIgnoreLastDivider(true);
+		divider.setDivider(new ColorDrawable(Color.GRAY) {
+			@Override
+			public int getIntrinsicHeight() {
+				return 2;
+			}
+		});
+		mRecycler.addItemDecoration(divider);
 		mLoadMoreAdapter = new LoadMoreAdapter(mRecycler, null);
 		mRecycler.setAdapter(mLoadMoreAdapter);
 
@@ -49,23 +58,11 @@ public class LoadMoreTest1Activity extends AppCompatActivity {
 				createData();
 			}
 		});
-
+		mLoadMoreAdapter.setLoadMore(new CustomLoadMoreView());
 
 		// 自动加载
-		findViewById(R.id.autoLoad).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				isAuto = true;
-			}
-		});
-
-		// 手动加载
-		findViewById(R.id.loadByUser).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				isAuto = false;
-			}
-		});
+		findViewById(R.id.autoLoad).setVisibility(View.INVISIBLE);
+		findViewById(R.id.loadByUser).setVisibility(View.INVISIBLE);
 	}
 
 	private void createData() {
@@ -73,7 +70,7 @@ public class LoadMoreTest1Activity extends AppCompatActivity {
 			@Override
 			public void run() {
 				SystemClock.sleep(1000);
-				if (new Random().nextInt(10) > 5) {
+				if (new Random().nextInt(10) > 1) {
 					List<String> currentData = new ArrayList<>(12);
 					for (int i = 64; i < 64 + 12; i++) {
 						String title = "page: " + mCurrentPage + " " + (char) i + "";
@@ -97,10 +94,8 @@ public class LoadMoreTest1Activity extends AppCompatActivity {
 			public void run() {
 				mLoadMoreAdapter.addItems(currentData);
 				mCurrentPage++;
-				if (isAuto) {
-					mLoadMoreAdapter.setStateLoadedAuto();
-				} else {
-					mLoadMoreAdapter.setStateLoadedByUser();
+				if (mCurrentPage == 5) {
+					mLoadMoreAdapter.setStateLoadedAll();
 				}
 			}
 		});

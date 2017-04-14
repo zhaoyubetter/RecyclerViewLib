@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="36dp">
+
+    <!-- auto load more view -->
+    <RelativeLayout
+        android:id="@+id/load_more_auto_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible">
+
+        <ProgressBar
+            android:id="@+id/simpleprogress"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:indeterminate="true"/>
+
+    </RelativeLayout>
+
+    <!-- load fail view -->
+    <TextView
+        android:id="@+id/load_more_load_fail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="加载失败，点击重试"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+    <!-- load no data view -->
+    <TextView
+        android:id="@+id/load_more_load_no_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="暂无内容"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+    <!-- load complete data view -->
+    <RelativeLayout
+        android:id="@+id/load_more_load_complete"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <View
+            android:id="@+id/left"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="48dp"
+            android:layout_toLeftOf="@+id/text2"
+            android:background="#16000000"/>
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:text="已拉到底啦"
+            android:textColor="#68000000"
+            android:textSize="14sp"/>
+
+        <View
+            android:id="@+id/right"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="48dp"
+            android:layout_toRightOf="@+id/text2"
+            android:background="#16000000"/>
+    </RelativeLayout>
+
+    <!-- load complete data view -->
+    <TextView
+        android:id="@+id/load_more_by_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/load_more_load_no_data"
+        android:layout_alignStart="@+id/load_more_load_no_data"
+        android:layout_alignTop="@+id/load_more_auto_loading"
+        android:text="点击加载"
+        android:textColor="#68000000"
+        android:textSize="14sp"
+        android:visibility="invisible"/>
+
+</RelativeLayout>

@@ -16,6 +16,7 @@ import ui.github.com.library.decoration.Divider;
 import ui.github.com.ui.FloatHeader2Activity;
 import ui.github.com.ui.FloatHeaderActivity;
 import ui.github.com.ui.ItemTypeDivideActivity;
+import ui.github.com.ui.LoadMoreActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 		datas.add(new ModelBean("条目与分割线", ItemTypeDivideActivity.class.getName()));
 		datas.add(new ModelBean("悬浮标题实现1(添加布局)", FloatHeaderActivity.class.getName()));
 		datas.add(new ModelBean("悬浮标题实现2(decoration)", FloatHeader2Activity.class.getName()));
+		datas.add(new ModelBean("加载更多的实现", LoadMoreActivity.class.getName()));
 		adapter.replaceData(datas);
 	}
 

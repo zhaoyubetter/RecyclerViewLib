@@ -19,6 +19,10 @@
         <activity android:name=".ui.ItemTypeDivideActivity"/>
         <activity android:name=".ui.FloatHeaderActivity"/>
         <activity android:name=".ui.FloatHeader2Activity"/>
+        <activity android:name=".ui.LoadMoreActivity"/>
+        <activity android:name=".ui.loadmore.LoadMoreTest1Activity"/>
+        <activity android:name=".ui.loadmore.LoadMoreTest2Activity"/>
+        <activity android:name=".ui.loadmore.LoadMoreTest3Activity"/>
     </application>
 
 </manifest>

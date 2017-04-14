@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:gravity="right">
+
+        <Button
+            android:id="@+id/autoLoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动加载"/>
+
+        <Button
+            android:id="@+id/loadByUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手动加载"/>
+
+    </LinearLayout>
+
+</FrameLayout>

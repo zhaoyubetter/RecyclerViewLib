@@ -33,10 +33,9 @@ public abstract class LoadMoreView {
 	 */
 	public static final int STATE_LOAD_FAIL = 5;
 	/**
-	 * 手动加载
+	 * 手动加载，默认状态
 	 */
 	public static final int STATE_LOAD_BY_USER = 4;
-
 
 	/**
 	 * 默认状态
@@ -47,7 +46,7 @@ public abstract class LoadMoreView {
 	private BaseRecyclerViewHolder mHolder;
 
 	/**
-	 * 实际View；
+	 * 实际View
 	 *
 	 * @return
 	 */
@@ -87,7 +86,7 @@ public abstract class LoadMoreView {
 		return mLoadMoreState;
 	}
 
-	public void convert(BaseRecyclerViewHolder holder) {
+	public void initLoadView(BaseRecyclerViewHolder holder) {
 		this.mHolder = holder;
 		mLoadView = holder.itemView;
 	}
