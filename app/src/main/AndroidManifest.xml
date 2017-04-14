@@ -20,9 +20,16 @@
         <activity android:name=".ui.FloatHeaderActivity"/>
         <activity android:name=".ui.FloatHeader2Activity"/>
         <activity android:name=".ui.LoadMoreActivity"/>
+
+        <!-- 加载更多 -->
         <activity android:name=".ui.loadmore.LoadMoreTest1Activity"/>
         <activity android:name=".ui.loadmore.LoadMoreTest2Activity"/>
         <activity android:name=".ui.loadmore.LoadMoreTest3Activity"/>
+        <activity android:name=".ui.loadmore.LoadMoreTest4Activity"/>
+
+        <!-- 下拉刷新 -->
+        <activity android:name=".ui.SwipeRefreshActivity"/>
+        <activity android:name=".ui.refresh.RefreshActivity1"/>
     </application>
 
 </manifest>

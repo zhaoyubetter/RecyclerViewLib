@@ -15,17 +15,13 @@ import ui.github.com.R;
 import ui.github.com.library.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.base.SimpleAdapter;
 import ui.github.com.library.decoration.Divider;
-import ui.github.com.ui.loadmore.LoadMoreTest1Activity;
-import ui.github.com.ui.loadmore.LoadMoreTest2Activity;
-import ui.github.com.ui.loadmore.LoadMoreTest3Activity;
-import ui.github.com.ui.loadmore.LoadMoreTest4Activity;
+import ui.github.com.ui.refresh.RefreshActivity1;
 
 
 /**
- * 加载更多页面
- * Created by zhaoyu on 2017/4/10.
+ * 下拉刷新
  */
-public class LoadMoreActivity extends AppCompatActivity {
+public class SwipeRefreshActivity extends AppCompatActivity {
 
 	private RecyclerView mRecycler;
 
@@ -42,26 +38,17 @@ public class LoadMoreActivity extends AppCompatActivity {
 
 	private void initEvents() {
 		List<String> data = new ArrayList<>();
-		data.add("加载更多-无限数据集");
-		data.add("加载更多-有限数据集");
-		data.add("加载更多-自定义加载View");
-		data.add("删除自动设置LoadView状态");
+		data.add("下拉刷新-上拉加载");
 		SimpleAdapter adapter = new SimpleAdapter(data);
 		adapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<String>() {
 			@Override
 			public void onItemClick(View view, int position, String item) {
 				if (position == 0) {
-					Intent intent = new Intent(getApplicationContext(), LoadMoreTest1Activity.class);
+					Intent intent = new Intent(getApplicationContext(), RefreshActivity1.class);
 					startActivity(intent);
 				} else if (position == 1) {
-					Intent intent = new Intent(getApplicationContext(), LoadMoreTest2Activity.class);
-					startActivity(intent);
 				} else if (position == 2) {
-					Intent intent = new Intent(getApplicationContext(), LoadMoreTest3Activity.class);
-					startActivity(intent);
 				} else if (position == 3) {
-					Intent intent = new Intent(getApplicationContext(), LoadMoreTest4Activity.class);
-					startActivity(intent);
 				}
 			}
 		});
