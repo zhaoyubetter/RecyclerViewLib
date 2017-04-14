@@ -14,6 +14,9 @@ import android.view.View;
  */
 public class Divider extends RecyclerView.ItemDecoration {
 
+	/**
+	 * 分割线Drawable
+	 */
 	private Drawable mDivider;
 
 	private int leftMargin, rightMargin, topMargin, bottomMargin;
@@ -21,6 +24,11 @@ public class Divider extends RecyclerView.ItemDecoration {
 	private int width, height;
 
 	private int mOrientation;
+
+	/**
+	 * not draw last divider?, if your use loadmoreAdapter,the your can set it true
+	 */
+	private boolean mIgnoreLastDivider = false;
 
 	/**
 	 * 分割线 drawable
@@ -33,7 +41,16 @@ public class Divider extends RecyclerView.ItemDecoration {
 		setOrientation(orientation);
 	}
 
-	private void setDivider(Drawable divider) {
+	/**
+	 * 是否忽略最后一个divider
+	 *
+	 * @param ignore
+	 */
+	public void setIgnoreLastDivider(boolean ignore) {
+		this.mIgnoreLastDivider = ignore;
+	}
+
+	public void setDivider(Drawable divider) {
 		this.mDivider = divider;
 		if (mDivider == null) {
 			mDivider = new ColorDrawable(0x17000000);
@@ -90,7 +107,7 @@ public class Divider extends RecyclerView.ItemDecoration {
 		final int top = parent.getPaddingTop() + topMargin;
 		final int bottom = parent.getHeight() - parent.getPaddingBottom() - bottomMargin;
 
-		final int childCount = parent.getChildCount();
+		final int childCount = parent.getChildCount() - (mIgnoreLastDivider ? 1 : 0);
 		for (int i = 0; i < childCount; i++) {
 			final View child = parent.getChildAt(i);
 			final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
@@ -106,7 +123,7 @@ public class Divider extends RecyclerView.ItemDecoration {
 		final int left = parent.getPaddingLeft() + leftMargin;
 		final int right = parent.getWidth() - parent.getPaddingRight() - rightMargin;
 
-		final int childCount = parent.getChildCount();
+		final int childCount = parent.getChildCount() - (mIgnoreLastDivider ? 1 : 0);
 		for (int i = 0; i < childCount; i++) {
 			final View child = parent.getChildAt(i);
 			final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
