@@ -1,4 +1,4 @@
-package ui.github.com.library.headerfooter;
+package ui.github.com.library.recycler.headerfooter;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
 
 /**
  * 添加 Header —— footer 包装

@@ -1,4 +1,4 @@
-package ui.github.com.library.loadmore;
+package ui.github.com.library.recycler.loadmore;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
@@ -12,15 +12,15 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
 
-import static ui.github.com.library.loadmore.LoadMoreView.STATE_INVISIBLE;
-import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOADING;
-import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_BY_USER;
-import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_COMPLETE;
-import static ui.github.com.library.loadmore.LoadMoreView.STATE_LOAD_FAIL;
-import static ui.github.com.library.loadmore.LoadMoreView.STATE_NO_DATA;
+import static ui.github.com.library.recycler.loadmore.LoadMoreView.STATE_INVISIBLE;
+import static ui.github.com.library.recycler.loadmore.LoadMoreView.STATE_LOADING;
+import static ui.github.com.library.recycler.loadmore.LoadMoreView.STATE_LOAD_BY_USER;
+import static ui.github.com.library.recycler.loadmore.LoadMoreView.STATE_LOAD_COMPLETE;
+import static ui.github.com.library.recycler.loadmore.LoadMoreView.STATE_LOAD_FAIL;
+import static ui.github.com.library.recycler.loadmore.LoadMoreView.STATE_NO_DATA;
 
 /**
  * 加载更多抽象基类

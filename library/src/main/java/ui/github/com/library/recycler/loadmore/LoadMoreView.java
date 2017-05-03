@@ -1,10 +1,10 @@
-package ui.github.com.library.loadmore;
+package ui.github.com.library.recycler.loadmore;
 
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.view.View;
 
-import ui.github.com.library.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
 
 /**
  * 加载更多抽象类

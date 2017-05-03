@@ -1,4 +1,4 @@
-package ui.github.com.library.decoration;
+package ui.github.com.library.recycler.decoration;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;

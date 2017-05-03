@@ -1,4 +1,4 @@
-package ui.github.com.library.base;
+package ui.github.com.library.recycler.base;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

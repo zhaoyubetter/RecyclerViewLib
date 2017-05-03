@@ -1,4 +1,4 @@
-package ui.github.com.library.loadmore;
+package ui.github.com.library.recycler.loadmore;
 
 import ui.github.com.library.R;
 
