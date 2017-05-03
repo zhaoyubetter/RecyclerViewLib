@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ui.github.com.R;
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.BaseRecyclerViewHolder;
-import ui.github.com.library.decoration.Divider;
-import ui.github.com.library.decoration.SectionDecoration;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.decoration.Divider;
+import ui.github.com.library.recycler.decoration.SectionDecoration;
 
 
 public class FloatHeader2Activity extends AppCompatActivity {

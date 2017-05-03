@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ui.github.com.R;
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.SimpleAdapter;
-import ui.github.com.library.decoration.Divider;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.SimpleAdapter;
+import ui.github.com.library.recycler.decoration.Divider;
 import ui.github.com.ui.refresh.RefreshActivity1;
 
 
@@ -39,6 +39,7 @@ public class SwipeRefreshActivity extends AppCompatActivity {
 	private void initEvents() {
 		List<String> data = new ArrayList<>();
 		data.add("下拉刷新-上拉加载");
+
 		SimpleAdapter adapter = new SimpleAdapter(data);
 		adapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<String>() {
 			@Override

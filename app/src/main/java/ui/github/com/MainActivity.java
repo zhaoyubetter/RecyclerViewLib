@@ -10,9 +10,9 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.BaseRecyclerViewHolder;
-import ui.github.com.library.decoration.Divider;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.decoration.Divider;
 import ui.github.com.ui.FloatHeader2Activity;
 import ui.github.com.ui.FloatHeaderActivity;
 import ui.github.com.ui.ItemTypeDivideActivity;

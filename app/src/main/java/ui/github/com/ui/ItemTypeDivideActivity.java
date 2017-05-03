@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ui.github.com.R;
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
 
 
 /**

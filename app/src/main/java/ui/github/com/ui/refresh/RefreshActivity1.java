@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Random;
 
 import ui.github.com.R;
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.BaseRecyclerViewHolder;
-import ui.github.com.library.decoration.Divider;
-import ui.github.com.library.loadmore.BaseLoadMoreRecyclerAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.decoration.Divider;
+import ui.github.com.library.recycler.loadmore.BaseLoadMoreRecyclerAdapter;
 
 /**
  * Created by zhaoyu on 2017/4/14.
@@ -33,7 +33,7 @@ public class RefreshActivity1 extends AppCompatActivity {
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setTitle("刷新与加载");
+		setTitle("系统的SwipeRefreshLayout 刷新与加载");
 
 		setContentView(R.layout.activity_refresh_1);
 		refreshLayout = (SwipeRefreshLayout) findViewById(R.id.refreshLayout);

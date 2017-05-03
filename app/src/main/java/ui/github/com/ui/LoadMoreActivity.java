@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ui.github.com.R;
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.SimpleAdapter;
-import ui.github.com.library.decoration.Divider;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.SimpleAdapter;
+import ui.github.com.library.recycler.decoration.Divider;
 import ui.github.com.ui.loadmore.LoadMoreTest1Activity;
 import ui.github.com.ui.loadmore.LoadMoreTest2Activity;
 import ui.github.com.ui.loadmore.LoadMoreTest3Activity;
