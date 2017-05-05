@@ -1,7 +1,7 @@
 package ui.github.com.ui.loadmore;
 
 import ui.github.com.R;
-import ui.github.com.library.loadmore.SimpleLoadMoreView;
+import ui.github.com.library.recycler.loadmore.SimpleLoadMoreView;
 
 /**
  * Created by zhaoyu on 2017/4/14.

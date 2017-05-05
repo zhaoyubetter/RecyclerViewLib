@@ -65,7 +65,7 @@ public class ItemTypeDivideActivity extends AppCompatActivity {
 	/**
 	 * 适配器
 	 */
-	private class CurrentAdapter extends BaseRecyclerViewAdapter<TypeItem> {
+	public static class CurrentAdapter extends BaseRecyclerViewAdapter<TypeItem> {
 
 		public final static int TYPE_NORMAL = 0;
 		public final static int TYPE_TITLE = 1;

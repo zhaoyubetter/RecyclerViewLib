@@ -16,6 +16,7 @@ import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.recycler.base.SimpleAdapter;
 import ui.github.com.library.recycler.decoration.Divider;
 import ui.github.com.ui.refresh.RefreshActivity1;
+import ui.github.com.ui.refresh.RefreshActivity2;
 
 
 /**
@@ -39,15 +40,19 @@ public class SwipeRefreshActivity extends AppCompatActivity {
 	private void initEvents() {
 		List<String> data = new ArrayList<>();
 		data.add("下拉刷新-上拉加载");
-
+		data.add("下拉刷新-自定义ViewGroup");
 		SimpleAdapter adapter = new SimpleAdapter(data);
 		adapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<String>() {
 			@Override
 			public void onItemClick(View view, int position, String item) {
 				if (position == 0) {
+					// 使用系统的
 					Intent intent = new Intent(getApplicationContext(), RefreshActivity1.class);
 					startActivity(intent);
 				} else if (position == 1) {
+					// 自定义ViewGroup
+					Intent intent = new Intent(getApplicationContext(), RefreshActivity2.class);
+					startActivity(intent);
 				} else if (position == 2) {
 				} else if (position == 3) {
 				}

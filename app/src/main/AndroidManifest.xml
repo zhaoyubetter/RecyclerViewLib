@@ -30,6 +30,8 @@
         <!-- 下拉刷新 -->
         <activity android:name=".ui.SwipeRefreshActivity"/>
         <activity android:name=".ui.refresh.RefreshActivity1"/>
+        <!-- 自定义ViewGroup -->
+        <activity android:name=".ui.refresh.RefreshActivity2"/>
     </application>
 
 </manifest>

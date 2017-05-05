@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Random;
 
 import ui.github.com.R;
-import ui.github.com.library.base.BaseRecyclerViewAdapter;
-import ui.github.com.library.base.BaseRecyclerViewHolder;
-import ui.github.com.library.decoration.Divider;
-import ui.github.com.library.loadmore.BaseLoadMoreRecyclerAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.decoration.Divider;
+import ui.github.com.library.recycler.loadmore.BaseLoadMoreRecyclerAdapter;
 
 import static ui.github.com.R.id.recyclerView;
 
