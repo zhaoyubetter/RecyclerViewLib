@@ -3,10 +3,13 @@ package ui.github.com.library.refresh;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.annotation.IdRes;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Scroller;
 
@@ -71,19 +74,51 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	 */
 	private RefreshHeader mRefreshHeader;
 	/**
-	 * 刷新头对应的展示策略
+	 * 刷新头对应的策略（展示、是否拦截事件）
 	 */
 	private HeaderStrategy mHeaderStrategy;
 
 	/**
-	 * 自定义HeaderViewId
+	 * 指定的HeaderViewId
 	 */
-	private int mUserHeaderViewId;
+	private int mHeaderViewId;
 
 	/**
-	 * 自定义refreshViewId
+	 * 指定的refreshViewId
 	 */
-	private int mUserRefreshViewId;
+	private int mRefreshViewId;
+	/**
+	 * 是否拦截事件
+	 */
+	private boolean mIntercept;
+	/**
+	 * 刷新模式
+	 */
+	private RefreshMode mRefreshMode;
+	/**
+	 * 刷新状态
+	 */
+	private RefreshState mRefreshState;
+
+	/**
+	 * 是否重新 dispatch
+	 */
+	private boolean mIsReDispatch;
+
+	private boolean mIsReleasing;//release the refreshing
+
+	/**
+	 * 下拉刷新回调接口
+	 */
+	private OnPullToRefreshListener mListener;
+
+	/**
+	 * 速度追踪
+	 */
+	private VelocityTracker mVelocityTracker;
+
+	private int mScaledMaximumFlingVelocity;
+	private int mScaledMinimumFlingVelocity;
 
 	public PullToRefreshLayout(Context context) {
 		this(context, null);
@@ -96,13 +131,20 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 
 	public PullToRefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+		// 初始化操作
+		mRefreshState = RefreshState.NONE;
 		mScroller = new Scroller(context);
+		mScaledMaximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		mScaledMinimumFlingVelocity = ViewConfiguration.get(context).getScaledMinimumFlingVelocity();
+
 		final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullToRefreshLayout);
 		try {
 			// 设置刷新头类型
 			setHeaderTypeInner(a.getInt(R.styleable.PullToRefreshLayout_pull_headerType, HEADER_INDICATOR));
 			// 设置刷新头展示策略（某种类型下的）
 			setHeaderStrategyInner(a.getInt(R.styleable.PullToRefreshLayout_pull_headerType, STRATEGY_FOLLOW));
+			// 设置刷新模式
+			setRefreshModeInner(a.getInt(R.styleable.PullToRefreshLayout_pull_refreshMode, RefreshMode.getDefault().getIntValue()));
 		} finally {
 			a.recycle();
 		}
@@ -113,15 +155,19 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 		super.onFinishInflate();
 		int childCount = getChildCount();
 
-		if (mUserHeaderViewId != NO_ID && mUserRefreshViewId != NO_ID) {
-			View headerView = findViewById(mUserHeaderViewId);
-			View targetView = findViewById(mUserRefreshViewId);
+		if (mHeaderViewId != NO_ID && mRefreshViewId != NO_ID) {
+			View headerView = findViewById(mHeaderViewId);
+			View targetView = findViewById(mRefreshViewId);
 		}
 
 		mTargetView = (V) getChildAt(0);
 
 		// 渲染完毕，初始化刷新头
 		setHeaderStrategy(mHeaderStrategy);
+	}
+
+	private void setRefreshModeInner(int mode) {
+		setRefreshMode(RefreshMode.values()[mode]);
 	}
 
 	/**
@@ -265,7 +311,6 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 				break;
 			}
 		}
-
 	}
 
 	/**
@@ -279,55 +324,122 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 		dealMulTouchEvent(ev);
 		final int action = ev.getActionMasked();
 		switch (action) {
-			case MotionEvent.ACTION_DOWN:
+			case MotionEvent.ACTION_DOWN:        // 按下
+				if (!isHeaderRefresh() && isChildScrollToTop()) {            // 不处于刷新态 && 在顶部
+					mIntercept = false;
+				} else {
+					mIntercept = mHeaderStrategy.isIntercept(mDistanceY);    // 策略中判断
+				}
+				if (DEBUG)
+					Log.e(TAG, "dispatchTouchEvent DOWN -->  Intercept: " + mIntercept + " isTop:" + isChildScrollToTop() + " intercept: " + mHeaderStrategy.isIntercept(mDistanceY)
+							+ " DistanceY: " + mDistanceY + ", scrollY: " + getScrollY());
 				break;
-			case MotionEvent.ACTION_MOVE:
+			case MotionEvent.ACTION_MOVE:        // 移动
+				if (null == mTargetView || Math.abs(mDistanceY) < Math.abs(mDistanceX)) {
+					mIntercept = false;
+				} else {
+					mIntercept = mHeaderStrategy.isIntercept(mDistanceY);
+				}
+
+				if (DEBUG)
+					Log.e(TAG, "dispatchTouchEvent MOVE -->  Intercept: " + mIntercept + " isTop:" + isChildScrollToTop() + " intercept: " + mHeaderStrategy.isIntercept(mDistanceY)
+							+ " DistanceY: " + mDistanceY + ", scrollY: " + getScrollY());
 				break;
 			case MotionEvent.ACTION_UP:
+			case MotionEvent.ACTION_CANCEL:
+				if (DEBUG)
+					Log.e(TAG, "dispatchTouchEvent UP_CANCEL -->  Intercept: " + mIntercept);
 				break;
 		}
 		return super.dispatchTouchEvent(ev);
 	}
 
+	/**
+	 * check header refresh status is drag
+	 *
+	 * @return
+	 */
+	private boolean isHeaderRefresh() {
+		return RefreshState.RELEASE_START == mRefreshState || RefreshState.START_REFRESHING == mRefreshState;
+	}
+
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		return true;
+		return mIntercept && mRefreshMode.enableHeader();
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (mTargetView == null) {
-			return false;
-		}
-
 		int x = (int) event.getX();
 		int y = (int) event.getY();
 
+		if (mVelocityTracker == null) {
+			mVelocityTracker = VelocityTracker.obtain();
+		}
+		mVelocityTracker.addMovement(event);
+
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
+				stopScrollAnimation();
 				mLastX = x;
 				mLastY = y;
+				// when current state is not refreshing,set pull start
+				if (RefreshState.START_REFRESHING != mRefreshState) {
+					mRefreshHeader.onRefreshStateChange(mRefreshState = RefreshState.PULL_START);
+				}
 				break;
 			case MotionEvent.ACTION_MOVE: {
-				int scrollY = Math.abs(getScrollY());                    // 垂直滚动距离
-				int moveDistanceY = (int) (mDistanceY / mResistance);   // 阻尼运动，原距离/1.8f
-				if (mDistanceY > 0 && MAX_PULL_INSTANCE <= scrollY) {
-					moveDistanceY = 0;
-				}
-				scrollBy(0, -moveDistanceY);
-				if (DEBUG) {
-					Log.e(TAG, String.format("distanceY: %s, scrollY: %s, moveDistanceY: %s", mDistanceY, getScrollY(), moveDistanceY));
+				if (mIntercept) {        // 被打断
+					if (RefreshState.NONE == mRefreshState) {    // 下拉开始
+						mRefreshHeader.onRefreshStateChange(mRefreshState = RefreshState.PULL_START);
+					}
+					mHeaderStrategy.onMoveOffset(mDistanceY);
+				} else if (0 != mDistanceY && mHeaderStrategy.isMoveToTop()) {
+					// 因为 mIntercept 由 dispatchTouchEvent 来设置，有可能 mIntercept 设置成了false(上滑动)
+					/**{@link #dispatchTouchEvent -> ACTION_MOVE}*/
+					if (DEBUG)
+						Log.e(TAG, "onTouchEvent：MOVE --------------========-->  move top");
+					// 重发down事件
+					mHeaderStrategy.onResetRefresh(RefreshState.PULL_START);
+					event.setAction(MotionEvent.ACTION_DOWN);
+					dispatchTouchEvent(event);
+					mIsReDispatch = false;
 				}
 				break;
 			}
 			case MotionEvent.ACTION_UP:
+				if (DEBUG)
+					Log.e(TAG, "onTouchEvent up:" + mRefreshState);
+				// 追踪速度
+				mVelocityTracker.computeCurrentVelocity(1000, mScaledMaximumFlingVelocity);
+				mIsReDispatch = false;
+				if (RefreshState.RELEASE_START == mRefreshState) {       // 释放刷新
+					if (DEBUG)
+						Log.e(TAG, "onTouchEvent up: 触发刷新 ===》 refresh");
+					callRefreshListener();
+				}
+				mHeaderStrategy.onResetRefresh(mRefreshState);
+				releaseVelocityTracker();
+				break;
 			case MotionEvent.ACTION_CANCEL:
-				mScroller.startScroll(0, getScrollY(), 0, -getScrollY(), mDuration);
-				invalidate();
+				stopScrollAnimation();
+				releaseVelocityTracker();
 				break;
 		}
 		return true;
-		//return super.onTouchEvent(event);
+	}
+
+	private void releaseVelocityTracker() {
+		if (null != mVelocityTracker) {
+			mVelocityTracker.recycle();
+			mVelocityTracker = null;
+		}
+	}
+
+	private void callRefreshListener() {
+		if (null != mListener) {
+			mListener.onRefresh();
+		}
 	}
 
 	@Override
@@ -337,6 +449,22 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 			scrollTo(0, mScroller.getCurrY());
 			postInvalidate();
 		}
+	}
+
+	private void stopScrollAnimation() {
+		if (!mScroller.isFinished()) {
+			mScroller.abortAnimation();
+		}
+	}
+
+	/**
+	 * 是否滑动到顶部
+	 *
+	 * @return
+	 */
+	public boolean isChildScrollToTop() {
+		// ViewCompat.canScrollVertically(mTargetView, -1); 到顶了返回 false
+		return !ViewCompat.canScrollVertically(mTargetView, -1);
 	}
 
 	@Override
@@ -354,8 +482,8 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	 *
 	 * @param mUserHeaderViewId
 	 */
-	private void setUserHeaderViewId(@IdRes int mUserHeaderViewId) {
-		this.mUserHeaderViewId = mUserHeaderViewId;
+	private void setHeaderViewId(@IdRes int mUserHeaderViewId) {
+		this.mHeaderViewId = mUserHeaderViewId;
 	}
 
 	/**
@@ -363,8 +491,8 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	 *
 	 * @param mUserRefreshViewId
 	 */
-	private void setUserRefreshViewId(@IdRes int mUserRefreshViewId) {
-		this.mUserRefreshViewId = mUserRefreshViewId;
+	private void setRefreshViewId(@IdRes int mUserRefreshViewId) {
+		this.mRefreshViewId = mUserRefreshViewId;
 	}
 
 	/**
@@ -378,5 +506,118 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 
 	public V getRefreshView() {
 		return mTargetView;
+	}
+
+	public void setRefreshMode(RefreshMode refreshMode) {
+		this.mRefreshMode = refreshMode;
+	}
+
+	public float getResistance() {
+		return mResistance;
+	}
+
+	/**
+	 * 最大下拉距离
+	 *
+	 * @return
+	 */
+	public float getPullMaxHeight() {
+		return mMaxPullInstance;
+	}
+
+	/**
+	 * 改变刷新状态 {@link #mRefreshState}
+	 *
+	 * @param fraction 范围 [0, 1]
+	 */
+	public void refreshStateChange(float fraction) {
+		if (RefreshState.PULL_START == mRefreshState && fraction >= 1.0f) {        // 开始下拉 -> 释放刷新  ( 拉满 >=1.0 )
+			mRefreshState = RefreshState.RELEASE_START;
+		} else if (RefreshState.RELEASE_START == mRefreshState && fraction < 1.0f) { // 释放刷新 -> 开始下拉  ( 未拉满 < 1.0 )
+			mRefreshState = RefreshState.PULL_START;
+		}
+
+		////////////////////////
+		else if (RefreshState.START_REFRESHING == mRefreshState && fraction < 1.0f) { // 刷新中 -> 刷新下释放
+			mRefreshState = RefreshState.RELEASE_REFRESHING_START;
+		} else if (RefreshState.RELEASE_REFRESHING_START == mRefreshState && fraction >= 1.0f) { // 刷新下释放 -> 刷新中
+			// when current state is release refreshing and fraction greater then 1.0 set refresh state start refreshing
+			mRefreshState = RefreshState.START_REFRESHING;
+		}
+
+
+		/*
+		 * 1. PULL_START  				-> 	RELEASE_START 				>= 1.0
+		 * 2. RELEASE_START 			->  PULL_START					< 1.0
+		 * 3. START_REFRESHING			->  RELEASE_REFRESHING_START	< 1.0
+		 * 4. RELEASE_REFRESHING_START	->  START_REFRESHING			>= 1.0
+		 */
+
+		/**
+		 * START_REFRESHING 刷新状态，在 onTouchEvent UP 事件中，由策略来设置
+		 * {@link #onTouchEvent ACTION_UP}
+		 * such as @see HeaderFollowStrategy#onResetRefresh(RefreshState)
+		 */
+
+		// 刷新头根据状态，改变刷新头界面显示形式
+		mRefreshHeader.onRefreshStateChange(mRefreshState);
+	}
+
+	public int getScrollDuration() {
+		return mDuration;
+	}
+
+
+	public void setReleasing(boolean releasing) {
+		this.mIsReleasing = releasing;
+	}
+
+	public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+		mScroller.startScroll(startX, startY, dx, dy, duration);
+	}
+
+	/**
+	 * 设置刷新状态
+	 *
+	 * @param refreshState
+	 */
+	public void setRefreshState(RefreshState refreshState) {
+		this.mRefreshState = refreshState;
+		if (mRefreshHeader != null) {
+			mRefreshHeader.onRefreshStateChange(refreshState);
+		}
+	}
+
+	public RefreshState getRefreshState() {
+		return mRefreshState;
+	}
+
+	/**
+	 * 刷新完成
+	 */
+	public void onRefreshComplete() {
+		mIntercept = false;
+		if (null != mHeaderStrategy) {
+			mHeaderStrategy.onRefreshComplete();
+		}
+	}
+
+	public void setOnPullToRefreshListener(OnPullToRefreshListener listener) {
+		this.mListener = listener;
+	}
+
+	public VelocityTracker getVelocityTracker() {
+		return mVelocityTracker;
+	}
+
+	public int getScaledMinimumFlingVelocity() {
+		return mScaledMinimumFlingVelocity;
+	}
+
+	/**
+	 * pull to refresh listener
+	 */
+	public interface OnPullToRefreshListener {
+		void onRefresh();
 	}
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PullToRefreshLayout">
+        <!-- 刷新头 类型 -->
+        <attr name="pull_headerType">
+            <!-- 指示器（不断旋转） -->
+            <enum name="indicator" value="0x00"/>
+            <!-- 指示器 (箭头) -->
+            <enum name="flip" value="0x01"/>
+            <!-- 系统的 -->
+            <enum name="material" value="0x02"/>
+            <!-- 显示的（不加任何逻辑） -->
+            <enum name="display" value="0x03"/>
+        </attr>
+
+        <!-- 刷新头 展示策略（onLayout方法） -->
+        <attr name="pull_headerStrategy">
+            <!-- 跟随 (在RefreshView上)-->
+            <enum name="follow" value="0x00"/>
+            <!-- 重叠（在RefreshView 后） -->
+            <enum name="overlap" value="0x01"/>
+            <!-- 重叠（在RefreshView 之上） -->
+            <enum name="front" value="0x02"/>
+            <!-- 显示（在RefreshView后） -->
+            <enum name="scroll" value="0x03"/>
+        </attr>
+
+        <!-- 刷新模式：允许，不允许-->
+        <attr name="pull_refreshMode">
+            <enum name="refresh_both" value="0x00"/>
+            <enum name="refresh_top" value="0x01"/>
+            <enum name="refresh_bottom" value="0x02"/>
+            <enum name="refresh_none" value="0x03"/>
+        </attr>
+    </declare-styleable>
+</resources>
