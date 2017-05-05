@@ -120,6 +120,11 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	private int mScaledMaximumFlingVelocity;
 	private int mScaledMinimumFlingVelocity;
 
+	/**
+	 * 是否显示刷新完成提示
+	 */
+	private boolean mShowRefreshCompleteInfo = false;
+
 	public PullToRefreshLayout(Context context) {
 		this(context, null);
 	}
@@ -139,6 +144,14 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 
 		final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullToRefreshLayout);
 		try {
+			// 刷新完成提示
+			setShowRefreshCompleteInfo(a.getBoolean(R.styleable.PullToRefreshLayout_pull_show_refresh_complete, false));
+			setPullMaxHeight(a.getDimension(R.styleable.PullToRefreshLayout_pull_max_height, MAX_PULL_INSTANCE));
+
+			// 自己指定内容
+			setHeaderViewId(a.getResourceId(R.styleable.PullToRefreshLayout_pull_header_resourceId, NO_ID));
+			setRefreshViewId(a.getResourceId(R.styleable.PullToRefreshLayout_pull_refreshView_resourceId, NO_ID));
+
 			// 设置刷新头类型
 			setHeaderTypeInner(a.getInt(R.styleable.PullToRefreshLayout_pull_headerType, HEADER_INDICATOR));
 			// 设置刷新头展示策略（某种类型下的）
@@ -188,6 +201,28 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 			case HEADER_DISPLAY:
 				break;
 		}
+	}
+
+	public void setPullMaxHeight(float pullMaxHeight) {
+		this.mMaxPullInstance = pullMaxHeight;
+	}
+
+	/**
+	 * 设置是否显示刷新完成提示
+	 *
+	 * @param showInfo
+	 */
+	public void setShowRefreshCompleteInfo(boolean showInfo) {
+		this.mShowRefreshCompleteInfo = showInfo;
+	}
+
+	/**
+	 * 是否显示刷新完成提示
+	 *
+	 * @return
+	 */
+	public boolean isShowRefreshCompleteInfo() {
+		return mShowRefreshCompleteInfo;
 	}
 
 	/**
@@ -436,7 +471,7 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 		}
 	}
 
-	private void callRefreshListener() {
+	public void callRefreshListener() {
 		if (null != mListener) {
 			mListener.onRefresh();
 		}
@@ -612,6 +647,17 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 
 	public int getScaledMinimumFlingVelocity() {
 		return mScaledMinimumFlingVelocity;
+	}
+
+	/**
+	 * 执行自动刷新，直接交给策略
+	 *
+	 * @param anim 是否带动画
+	 */
+	public void autoRefreshing(boolean anim) {
+		if (null != mHeaderStrategy && mRefreshMode.enableHeader()) {
+			mHeaderStrategy.autoRefreshing(anim);
+		}
 	}
 
 	/**
