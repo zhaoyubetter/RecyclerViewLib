@@ -55,21 +55,27 @@ public class IndicatorHeader extends RefreshHeader {
 
 		switch (state) {
 			case RELEASE_START:
-				mInfoText.setText(R.string.pull_to_refresh_release);            // 下拉刷新
+				mInfoText.setText(R.string.pull_to_refresh_release);           // 下拉刷新
 				break;
-			case START_REFRESHING:                // 准备刷新
+			case START_REFRESHING:                        // 刷新
 				mHeaderView.setVisibility(View.VISIBLE);
-			case RELEASE_REFRESHING_START:             // 释放刷新
-				mInfoText.setText(R.string.pull_to_refresh_refreshing);         // 松开刷新
+			case RELEASE_REFRESHING_START:                // 刷新下释放
+				mInfoText.setText(R.string.pull_to_refresh_refreshing);
 				mImageView.startAnimation(mAnimation);
+				break;
+			case REFRESHING_START_COMPLETE:                 // 刷新完成
+				mImageView.clearAnimation();        // 清除动画
+				mImageView.setVisibility(View.INVISIBLE);
+				mInfoText.setText(R.string.pull_to_refresh_complete);
 				break;
 			case NONE:
 				mHeaderView.setVisibility(View.GONE); // 去掉
 				break;
 			case PULL_START:
 			default:
-				mHeaderView.setVisibility(View.VISIBLE);
 				mImageView.clearAnimation();
+				mHeaderView.setVisibility(View.VISIBLE);
+				mImageView.setVisibility(View.VISIBLE);
 				mInfoText.setText(R.string.pull_to_refresh_pull);
 				break;
 		}
