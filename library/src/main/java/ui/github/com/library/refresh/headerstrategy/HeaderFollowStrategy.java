@@ -8,6 +8,8 @@ import ui.github.com.library.refresh.PullToRefreshLayout;
 import ui.github.com.library.refresh.RefreshState;
 import ui.github.com.library.refresh.header.RefreshHeader;
 
+import static ui.github.com.library.refresh.RefreshState.RELEASE_REFRESHING_START;
+
 
 /**
  * FollowHeader 策略
@@ -116,7 +118,7 @@ public class HeaderFollowStrategy extends HeaderStrategy {
 		} else if (RefreshState.PULL_START == state) {
 			mPullToRefreshLayout.setReleasing(true);    // 已释放
 			mPullToRefreshLayout.startScroll(0, scrollY, 0, -scrollY, scrollDuration);    // 还原
-		} else if (RefreshState.RELEASE_REFRESHING_START == state) {
+		} else if (RELEASE_REFRESHING_START == state) {
 			VelocityTracker velocityTracker = mPullToRefreshLayout.getVelocityTracker();
 			int scaledMinimumFlingVelocity = mPullToRefreshLayout.getScaledMinimumFlingVelocity();
 			float yVelocity = Math.abs(velocityTracker.getYVelocity());    // 当前y上的速度 注意： 负数问题
@@ -144,12 +146,55 @@ public class HeaderFollowStrategy extends HeaderStrategy {
 	@Override
 	public void onRefreshComplete() {
 		RefreshState refreshState = mPullToRefreshLayout.getRefreshState();
-		if (RefreshState.START_REFRESHING == refreshState) {
-			int scrollY = mPullToRefreshLayout.getScrollY();
-			int scrollDuration = mPullToRefreshLayout.getScrollDuration();
+		if (RefreshState.START_REFRESHING == refreshState || RefreshState.RELEASE_REFRESHING_START == refreshState) {
+			final int scrollY = mPullToRefreshLayout.getScrollY();
+			final int scrollDuration = mPullToRefreshLayout.getScrollDuration();
+
+			// 需要显示刷新完成
+			if (mPullToRefreshLayout.isShowRefreshCompleteInfo()) {
+				// 显示一下刷新完成，并延迟回位
+				mPullToRefreshLayout.setRefreshState(RefreshState.REFRESHING_START_COMPLETE);
+				mPullToRefreshLayout.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						back(scrollY, scrollDuration);
+					}
+				}, scrollDuration);
+			} else {
+				back(scrollY, scrollDuration);
+			}
+		} else {
+			mPullToRefreshLayout.setRefreshState(RefreshState.NONE);
+		}
+	}
+
+	@Override
+	public void autoRefreshing(boolean anim) {
+		final RefreshHeader refreshHeader = mPullToRefreshLayout.getRefreshHeader();
+		final int headerHeight = refreshHeader.getHeaderHeight();
+		if (mPullToRefreshLayout.getRefreshState() != RefreshState.START_REFRESHING) {
+			if (anim) {
+				mPullToRefreshLayout.startScroll(0, mPullToRefreshLayout.getScrollY(), 0, -mPullToRefreshLayout.getScrollY() - headerHeight, mPullToRefreshLayout.getScrollDuration());
+			} else {
+				mPullToRefreshLayout.scrollTo(0, -headerHeight);
+			}
+			mPullToRefreshLayout.postInvalidate();
+			mPullToRefreshLayout.callRefreshListener();
+			mPullToRefreshLayout.setRefreshState(RefreshState.START_REFRESHING);
+		}
+	}
+
+	/**
+	 * 刷完回位
+	 *
+	 * @param scrollY
+	 * @param scrollDuration
+	 */
+	private void back(int scrollY, int scrollDuration) {
+		if (mPullToRefreshLayout != null) {
 			mPullToRefreshLayout.startScroll(0, scrollY, 0, -scrollY, scrollDuration);
 			mPullToRefreshLayout.requestLayout();
+			mPullToRefreshLayout.setRefreshState(RefreshState.NONE);
 		}
-		mPullToRefreshLayout.setRefreshState(RefreshState.NONE);
 	}
 }

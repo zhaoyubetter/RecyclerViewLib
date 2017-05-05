@@ -88,4 +88,11 @@ public abstract class HeaderStrategy {
 	 * 刷新完成
 	 */
 	public abstract void onRefreshComplete();
+
+	/**
+	 * 自动执行下拉刷新
+	 *
+	 * @param anim
+	 */
+	public abstract void autoRefreshing(boolean anim);
 }
