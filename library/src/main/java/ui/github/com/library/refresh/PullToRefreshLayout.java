@@ -16,7 +16,7 @@ import android.widget.Scroller;
 import ui.github.com.library.R;
 import ui.github.com.library.refresh.header.IndicatorHeader;
 import ui.github.com.library.refresh.header.RefreshHeader;
-import ui.github.com.library.refresh.headerstrategy.HeaderFollowStrategy;
+import ui.github.com.library.refresh.headerstrategy.HeaderOverlapStrategy;
 import ui.github.com.library.refresh.headerstrategy.HeaderStrategy;
 
 
@@ -184,6 +184,21 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	}
 
 	/**
+	 * 设置刷新头策略
+	 *
+	 * @param strategy
+	 */
+	private void setHeaderStrategyInner(int strategy) {
+		switch (strategy) {
+			case STRATEGY_FOLLOW:
+				setHeaderStrategy(new HeaderOverlapStrategy(this), false);
+				break;
+			case STRATEGY_OVERLAP:
+				break;
+		}
+	}
+
+	/**
 	 * 设置刷新头 - 类型
 	 *
 	 * @param type
@@ -244,20 +259,6 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 		setHeaderStrategy(headerStrategy, true);
 	}
 
-	/**
-	 * 设置刷新头策略
-	 *
-	 * @param strategy
-	 */
-	private void setHeaderStrategyInner(int strategy) {
-		switch (strategy) {
-			case STRATEGY_FOLLOW:
-				setHeaderStrategy(new HeaderFollowStrategy(this), false);
-				break;
-			case STRATEGY_OVERLAP:
-				break;
-		}
-	}
 
 	private void setHeaderStrategy(HeaderStrategy headerStrategy, boolean initRefreshHeader) {
 		this.mHeaderStrategy = headerStrategy;
@@ -379,6 +380,17 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 				if (DEBUG)
 					Log.e(TAG, "dispatchTouchEvent MOVE -->  Intercept: " + mIntercept + " isTop:" + isChildScrollToTop() + " intercept: " + mHeaderStrategy.isIntercept(mDistanceY)
 							+ " DistanceY: " + mDistanceY + ", scrollY: " + getScrollY());
+
+				// 重发 dispatchTouchEvent
+//				if (mIntercept && !mIsReDispatch) {
+//					mIsReDispatch = true;
+//					ev.setAction(MotionEvent.ACTION_CANCEL);
+//					MotionEvent ev2 = MotionEvent.obtain(ev);
+//					dispatchTouchEvent(ev);
+//					ev2.setAction(MotionEvent.ACTION_DOWN);
+//					return dispatchTouchEvent(ev2);
+//				}
+
 				break;
 			case MotionEvent.ACTION_UP:
 			case MotionEvent.ACTION_CANCEL:
@@ -430,11 +442,12 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 					}
 					mHeaderStrategy.onMoveOffset(mDistanceY);
 				} else if (0 != mDistanceY && mHeaderStrategy.isMoveToTop()) {
+
 					// 因为 mIntercept 由 dispatchTouchEvent 来设置，有可能 mIntercept 设置成了false(上滑动)
 					/**{@link #dispatchTouchEvent -> ACTION_MOVE}*/
 					if (DEBUG)
 						Log.e(TAG, "onTouchEvent：MOVE --------------========-->  move top");
-					// 重发down事件
+					// 不拦截时，重发down事件
 					mHeaderStrategy.onResetRefresh(RefreshState.PULL_START);
 					event.setAction(MotionEvent.ACTION_DOWN);
 					dispatchTouchEvent(event);
@@ -568,16 +581,21 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	public void refreshStateChange(float fraction) {
 		if (RefreshState.PULL_START == mRefreshState && fraction >= 1.0f) {        // 开始下拉 -> 释放刷新  ( 拉满 >=1.0 )
 			mRefreshState = RefreshState.RELEASE_START;
+			// 刷新头根据状态，改变刷新头界面显示形式
+			mRefreshHeader.onRefreshStateChange(mRefreshState);
 		} else if (RefreshState.RELEASE_START == mRefreshState && fraction < 1.0f) { // 释放刷新 -> 开始下拉  ( 未拉满 < 1.0 )
 			mRefreshState = RefreshState.PULL_START;
+			mRefreshHeader.onRefreshStateChange(mRefreshState);
 		}
 
 		////////////////////////
 		else if (RefreshState.START_REFRESHING == mRefreshState && fraction < 1.0f) { // 刷新中 -> 刷新下释放
 			mRefreshState = RefreshState.RELEASE_REFRESHING_START;
+			mRefreshHeader.onRefreshStateChange(mRefreshState);
 		} else if (RefreshState.RELEASE_REFRESHING_START == mRefreshState && fraction >= 1.0f) { // 刷新下释放 -> 刷新中
 			// when current state is release refreshing and fraction greater then 1.0 set refresh state start refreshing
 			mRefreshState = RefreshState.START_REFRESHING;
+			mRefreshHeader.onRefreshStateChange(mRefreshState);
 		}
 
 
@@ -594,8 +612,9 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 		 * such as @see HeaderFollowStrategy#onResetRefresh(RefreshState)
 		 */
 
-		// 刷新头根据状态，改变刷新头界面显示形式
-		mRefreshHeader.onRefreshStateChange(mRefreshState);
+		if (DEBUG) {
+			Log.e(TAG, "refreshStateChange currentState is : " + mRefreshState + " and fraction: " + fraction);
+		}
 	}
 
 	public int getScrollDuration() {

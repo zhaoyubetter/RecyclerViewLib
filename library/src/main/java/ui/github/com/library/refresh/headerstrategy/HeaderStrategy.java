@@ -8,7 +8,14 @@ import ui.github.com.library.refresh.RefreshState;
 import ui.github.com.library.refresh.header.RefreshHeader;
 
 /**
- * 刷新头策略，通过策略来布局
+ * 刷新头策略
+ * 主要职责：
+ * 1. 布局刷新头、刷新View
+ * 2. ViewGroup拦截事件控制
+ * 3. onMoveOffset方法 处理MOVE事件，并产生相应的 刷新状态 {@link RefreshState} {@link PullToRefreshLayout#refreshStateChange(float)}
+ * 4. onResetRefresh，手指抬起时，根据当前 刷新状态 来设置整个PullToRefresh控件,如：是否还原，是否刷新等 {@link PullToRefreshLayout#onTouchEvent}
+ * 5. 设置自动刷新策略{@link HeaderStrategy#autoRefreshing}
+ * 6. 设置刷新完成 {@link HeaderStrategy#onRefreshComplete}
  */
 public abstract class HeaderStrategy {
 
@@ -78,7 +85,7 @@ public abstract class HeaderStrategy {
 	public abstract boolean isMoveToTop();
 
 	/**
-	 * 刷新状态改变
+	 * 刷新状态改变，控制刷新view的动作
 	 *
 	 * @param state
 	 */

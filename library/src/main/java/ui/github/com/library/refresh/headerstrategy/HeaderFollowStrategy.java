@@ -82,7 +82,7 @@ public class HeaderFollowStrategy extends HeaderStrategy {
 			fraction = 1.0f;
 		}
 
-		mPullToRefreshLayout.refreshStateChange(fraction);                    // 改变控件刷新状态
+		mPullToRefreshLayout.refreshStateChange(fraction);                   // 改变控件刷新状态
 		refreshHeader.onRefreshOffset(fraction, scrollY, headerHeight);     // 设置头相关
 
 		if (DEBUG) {
@@ -116,7 +116,7 @@ public class HeaderFollowStrategy extends HeaderStrategy {
 		if (RefreshState.NONE == state) {
 			mPullToRefreshLayout.scrollTo(0, 0);        // 还原
 		} else if (RefreshState.PULL_START == state) {
-			mPullToRefreshLayout.setReleasing(true);    // 已释放
+			mPullToRefreshLayout.setReleasing(true);
 			mPullToRefreshLayout.startScroll(0, scrollY, 0, -scrollY, scrollDuration);    // 还原
 		} else if (RELEASE_REFRESHING_START == state) {
 			VelocityTracker velocityTracker = mPullToRefreshLayout.getVelocityTracker();
@@ -193,8 +193,9 @@ public class HeaderFollowStrategy extends HeaderStrategy {
 	private void back(int scrollY, int scrollDuration) {
 		if (mPullToRefreshLayout != null) {
 			mPullToRefreshLayout.startScroll(0, scrollY, 0, -scrollY, scrollDuration);
-			mPullToRefreshLayout.requestLayout();
+			// postInvalidate() 改变不了具体位置，必须requestLayout
 			mPullToRefreshLayout.setRefreshState(RefreshState.NONE);
+			mPullToRefreshLayout.requestLayout();
 		}
 	}
 }
