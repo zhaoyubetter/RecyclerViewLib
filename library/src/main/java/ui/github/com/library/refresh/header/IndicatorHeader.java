@@ -71,10 +71,11 @@ public class IndicatorHeader extends RefreshHeader {
 			case NONE:
 				mHeaderView.setVisibility(View.GONE); // 去掉
 				break;
+
 			case PULL_START:
 			default:
-				mImageView.clearAnimation();
 				mHeaderView.setVisibility(View.VISIBLE);
+				mImageView.clearAnimation();
 				mImageView.setVisibility(View.VISIBLE);
 				mInfoText.setText(R.string.pull_to_refresh_pull);
 				break;

@@ -8,6 +8,12 @@ import ui.github.com.library.refresh.RefreshState;
 
 /**
  * 刷新头抽象类
+ * 主要职责：
+ * 1. 刷新头布局
+ * 2. 刷新状态 {@link RefreshState} 改变时, 刷新头变化，如：需要释放刷新时，提示文字 为：释放刷新
+ * 3. 根据 move 事件引起的 刷新状态 变化，而及时更新新头界面显示，用来提醒用户，当前的刷新状态
+ * {@link ui.github.com.library.refresh.headerstrategy.HeaderStrategy#onMoveOffset(float)}
+ * {@link ui.github.com.library.refresh.PullToRefreshLayout#refreshStateChange} ,
  */
 public abstract class RefreshHeader {
 
