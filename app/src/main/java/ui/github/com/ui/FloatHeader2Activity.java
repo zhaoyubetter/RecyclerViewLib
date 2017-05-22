@@ -15,6 +15,8 @@ import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
 import ui.github.com.library.recycler.decoration.Divider;
 import ui.github.com.library.recycler.decoration.SectionDecoration;
 
+import static ui.github.com.ui.ItemTypeDivideActivity.CurrentAdapter.TYPE_TITLE;
+
 
 public class FloatHeader2Activity extends AppCompatActivity {
 
@@ -36,7 +38,6 @@ public class FloatHeader2Activity extends AppCompatActivity {
 		int x = 0;
 		for (int i = 64; i < 64 + 15; i++) {
 			String title = "" + (char) i;
-			//mData.add(new TypeItem(CurrentAdapter.TYPE_TITLE, title));
 			mScetionArray.put(x, title);
 			for (int j = 0; j < 10; j++) {
 				mData.add(new TypeItem(CurrentAdapter.TYPE_NORMAL, title + (j + 1)));
@@ -67,7 +68,6 @@ public class FloatHeader2Activity extends AppCompatActivity {
 	private class CurrentAdapter extends BaseRecyclerViewAdapter<TypeItem> {
 
 		public final static int TYPE_NORMAL = 0;
-		public final static int TYPE_TITLE = 1;
 
 		@Override
 		public int getItemViewType(int position) {

@@ -78,6 +78,9 @@ public class FloatHeaderActivity extends AppCompatActivity {
 
 				View view = linearLayoutManager.findViewByPosition(mCurrPos + 1);
 				if (view != null && linearLayoutManager.getItemViewType(view) == CurrentAdapter.TYPE_TITLE) {
+					Log.e(TAG, "top: " + view.getTop() + ", headerHeight: " + mHeaderItemHeight + ", title: " +
+							((TextView) float_title_view.findViewById(R.id.name)).getText() + ", mCurrPos: " + mCurrPos);
+
 					if (view.getTop() <= mHeaderItemHeight) {
 						// 盖住原有Header
 						float_title_view.setY(-(mHeaderItemHeight - view.getTop()));
