@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import ui.github.com.Data;
 import ui.github.com.R;
@@ -52,20 +51,6 @@ public class FloatHeader3Activity extends AppCompatActivity {
 			@Override
 			public void onItemClick(View view, int position, String item) {
 				innerAdapter.removeItemAt(position);
-			}
-		});
-
-		findViewById(R.id.remove).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				innerAdapter.removeItemAt(new Random().nextInt(20));
-			}
-		});
-
-		findViewById(R.id.add).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				innerAdapter.addItemAt(new Random().nextInt(20), "AAAAAAAA");
 			}
 		});
 	}
