@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Scroller;
 
 import ui.github.com.library.R;
-import ui.github.com.library.refresh.header.IndicatorHeader;
+import ui.github.com.library.refresh.header.FlipHeader;
 import ui.github.com.library.refresh.header.RefreshHeader;
 import ui.github.com.library.refresh.headerstrategy.HeaderOverlapStrategy;
 import ui.github.com.library.refresh.headerstrategy.HeaderStrategy;
@@ -34,13 +34,11 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 	public static final int HEADER_INDICATOR = 0x00;
 	public static final int HEADER_FLIP = 0x01;
 	public static final int HEADER_MATERIAL = 0x02;
-	public static final int HEADER_DISPLAY = 0x03;
 	/* ======== HeaderView 类型 ======== */
 
 	/* ======== HeaderView 展示策略  ======== */
 	public static final int STRATEGY_FOLLOW = 0x00;
 	public static final int STRATEGY_OVERLAP = 0x01;
-	public static final int STRATEGY_FRONT = 0x02;
 	public static final int STRATEGY_SCROLL = 0x03;
 	/* ======== HeaderView 展示策略  ======== */
 
@@ -207,13 +205,12 @@ public class PullToRefreshLayout<V extends View> extends ViewGroup {
 		Context context = getContext();
 		switch (type) {
 			case HEADER_INDICATOR:
-				mRefreshHeader = new IndicatorHeader(context, this);
+				mRefreshHeader = new FlipHeader(context, this);
 				break;
 			case HEADER_FLIP:
+				mRefreshHeader = new FlipHeader(context, this);
 				break;
 			case HEADER_MATERIAL:
-				break;
-			case HEADER_DISPLAY:
 				break;
 		}
 	}
