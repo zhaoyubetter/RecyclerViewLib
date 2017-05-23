@@ -2,6 +2,7 @@ package ui.github.com.library.recycler.group;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import ui.github.com.library.R;
 
@@ -20,8 +22,13 @@ import ui.github.com.library.R;
 public class StickyRecyclerView extends RecyclerView {
 
 
+	/**
+	 * StickyView 资源ID
+	 */
+	private int mStickyViewResId;
 	private View mStickyView;
 	private StickyScrollListener mListener;
+	private ViewGroup mParent;
 
 	public StickyRecyclerView(Context context) {
 		this(context, null);
@@ -38,26 +45,28 @@ public class StickyRecyclerView extends RecyclerView {
 		a.recycle();
 	}
 
-	public void setStickyView(int resourceId) {
+	private ViewGroup getParentView() {
+		if (mParent == null) {
+			mParent = (ViewGroup) this.getParent();
+		}
+		return mParent;
+	}
+
+	public void setStickyView(@LayoutRes int resourceId) {
 		if (View.NO_ID != resourceId) {
-			mStickyView = LayoutInflater.from(getContext()).inflate(resourceId, this, false);
+			mStickyViewResId = resourceId;
+			if (getParentView() != null) {
+				mStickyView = LayoutInflater.from(getContext()).inflate(resourceId, getParentView(), false);
+			}
 		}
 	}
 
 	public void setStickyView(View view) {
-		if (mStickyView != null) {
-			removeView(mStickyView);
+		if (mStickyView != null && getParentView() != null) {
+			getParentView().removeView(mStickyView);
 		}
 		// 不添加,等待setAdapter时添加,避免出现无数据显示一个空的头情况
 		this.mStickyView = view;
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		super.onLayout(changed, l, t, r, b);
-		if (null != mStickyView) {
-			mStickyView.layout(l, t, r, mStickyView.getMeasuredHeight());
-		}
 	}
 
 	@Override
@@ -67,9 +76,13 @@ public class StickyRecyclerView extends RecyclerView {
 			throw new IllegalArgumentException("RecyclerView.Adapter must be implements StickyCallback!");
 		}
 
+		if (null == mStickyView && mStickyViewResId != View.NO_ID) {
+			mStickyView = LayoutInflater.from(getContext()).inflate(mStickyViewResId, getParentView(), false);
+		}
+
 		if (null != mStickyView) {
-			removeView(mStickyView);
-			addView(mStickyView);        // 这里添加
+			getParentView().removeView(mStickyView);
+			getParentView().addView(mStickyView);        // mStickyView 是添加到 ParentView
 			this.removeOnScrollListener(mListener);
 			mListener = new StickyScrollListener((StickyCallback) adapter);
 			this.addOnScrollListener(mListener);
@@ -112,7 +125,7 @@ public class StickyRecyclerView extends RecyclerView {
 					for (int position = realVisibleItemPosition; position <= lastRealPosition; position++) {
 						if (lastVisibleItemPosition != firstVisibleItemPosition && callback.isStickyPosition(position)) {
 							lastVisibleItemPosition = firstVisibleItemPosition;
-							callback.initStickyView(mStickyView, realVisibleItemPosition);        // 初始化StickyView
+							callback.initStickyView(mStickyView, realVisibleItemPosition);        //
 							break;
 						}
 					}
@@ -121,6 +134,7 @@ public class StickyRecyclerView extends RecyclerView {
 					// 在这个范围内,找到本页内可能出现的下一个阶段的条目位置.		--》悬浮移动
 					int stickyPosition = findStickyPosition(realVisibleItemPosition + 1, linearLayoutManager.findLastVisibleItemPosition());
 					if (RecyclerView.NO_POSITION != stickyPosition) {
+						// 下一个 StickyView，到顶的时候进行位移
 						View nextAdapterView = layoutManager.findViewByPosition(stickyPosition);
 						if (null != nextAdapterView && nextAdapterView.getTop() < mStickyView.getHeight()) {
 							mStickyView.setTranslationY(nextAdapterView.getTop() - mStickyView.getHeight());

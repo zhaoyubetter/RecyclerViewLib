@@ -76,42 +76,36 @@ public class GroupingStrategy {
 			@Override
 			public void onChanged() {
 				super.onChanged();
-				adapter.notifyDataSetChanged();
 				refreshIndexItems();
 			}
 
 			@Override
 			public void onItemRangeChanged(int positionStart, int itemCount) {
 				super.onItemRangeChanged(positionStart, itemCount);
-				adapter.notifyDataSetChanged();
 				refreshIndexItems();
 			}
 
 			@Override
 			public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
 				super.onItemRangeChanged(positionStart, itemCount, payload);
-				adapter.notifyDataSetChanged();
 				refreshIndexItems();
 			}
 
 			@Override
 			public void onItemRangeInserted(int positionStart, int itemCount) {
 				super.onItemRangeInserted(positionStart, itemCount);
-				adapter.notifyDataSetChanged();
 				refreshIndexItems();
 			}
 
 			@Override
 			public void onItemRangeRemoved(int positionStart, int itemCount) {
 				super.onItemRangeRemoved(positionStart, itemCount);
-				adapter.notifyDataSetChanged();
 				refreshIndexItems();
 			}
 
 			@Override
 			public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
 				super.onItemRangeMoved(fromPosition, toPosition, itemCount);
-				adapter.notifyDataSetChanged();
 				refreshIndexItems();
 			}
 		});
