@@ -84,7 +84,7 @@ public class FloatHeaderActivity extends AppCompatActivity {
 					if (view.getTop() <= mHeaderItemHeight) {
 						// 盖住原有Header
 //						float_title_view.setY(-(mHeaderItemHeight - view.getTop()));
-						float_title_view.setTranslationY(view.getTop() - mHeaderItemHeight);
+						float_title_view.setTranslationY(-(mHeaderItemHeight - view.getTop()));		// 正下，负上
 					} else {
 //						float_title_view.setY(0);
 						float_title_view.setTranslationY(0);
