@@ -40,7 +40,7 @@ public class SwipeRefreshActivity extends AppCompatActivity {
 	private void initEvents() {
 		List<String> data = new ArrayList<>();
 		data.add("下拉刷新-上拉加载");
-		data.add("下拉刷新-自定义ViewGroup");
+		data.add("下拉刷新-FollowHeader");
 		SimpleAdapter adapter = new SimpleAdapter(data);
 		adapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<String>() {
 			@Override

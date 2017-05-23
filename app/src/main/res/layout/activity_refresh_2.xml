@@ -18,4 +18,30 @@
             android:layout_height="match_parent"/>
     </ui.github.com.library.refresh.PullToRefreshLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/auto_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto Refresh"/>
+
+        <Button
+            android:id="@+id/no_anim"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto Refresh(No Anim)"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_launcher"
+        android:visibility="invisible"/>
+
 </FrameLayout>

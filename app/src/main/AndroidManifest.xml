@@ -32,6 +32,8 @@
         <activity android:name=".ui.refresh.RefreshActivity1"/>
         <!-- 自定义ViewGroup -->
         <activity android:name=".ui.refresh.RefreshActivity2"/>
+        <activity android:name=".ui.FloatHeader3Activity">
+        </activity>
     </application>
 
 </manifest>

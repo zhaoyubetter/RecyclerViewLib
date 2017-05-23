@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -14,9 +15,9 @@ import java.util.List;
 
 import ui.github.com.R;
 import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
+import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
+import ui.github.com.library.recycler.base.SimpleAdapter;
 import ui.github.com.library.refresh.PullToRefreshLayout;
-import ui.github.com.ui.ItemTypeDivideActivity;
-import ui.github.com.ui.TypeItem;
 
 /**
  * 下拉刷新2，使用自定义控件
@@ -27,17 +28,21 @@ public class RefreshActivity2 extends AppCompatActivity {
 	PullToRefreshLayout refreshLayout;
 	RecyclerView mRecyclerView;
 
-	private List<TypeItem> mData = new ArrayList<>();
-	private ItemTypeDivideActivity.CurrentAdapter mAdapter;
+	SimpleAdapter mAdapter;
+	private List<String> mData = new ArrayList<>();
+	int index = 1;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
-		setTitle("自定义ViewGroup");
+		setTitle("下拉刷新-FollowHeader");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_refresh_2);
 		refreshLayout = (PullToRefreshLayout) findViewById(R.id.pullToRefreshLayout);
 		mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
+		final View iv = findViewById(R.id.iv);
+
+		// =================================
 		// 下拉刷新
 		refreshLayout.setOnPullToRefreshListener(new PullToRefreshLayout.OnPullToRefreshListener() {
 			@Override
@@ -46,32 +51,46 @@ public class RefreshActivity2 extends AppCompatActivity {
 			}
 		});
 
-
-		for (int i = 64; i < 64 + 15; i++) {
-			String title = "" + (char) i;
-			mData.add(new TypeItem(ItemTypeDivideActivity.CurrentAdapter.TYPE_TITLE, title));
-
-			for (int j = 0; j < 10; j++) {
-				mData.add(new TypeItem(ItemTypeDivideActivity.CurrentAdapter.TYPE_NORMAL, title + (j + 1)));
-			}
-		}
-		// 1.创建RecyclerView对象
-		mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-		// 2.设置显示规则
-		mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-		// 3.设置adapter
-		mAdapter = new ItemTypeDivideActivity.CurrentAdapter();
-		mRecyclerView.setAdapter(mAdapter);
-		// 4.添加分割线
-		mRecyclerView.addItemDecoration(new ItemTypeDivideActivity.CurrentItemDecoration(this));
-		mAdapter.replaceData(mData);
-
-		mAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<TypeItem>() {
+		// 自动刷新（动画）
+		findViewById(R.id.auto_refresh).setOnClickListener(new View.OnClickListener() {
 			@Override
-			public void onItemClick(View view, int position, TypeItem item) {
-				Toast.makeText(getApplicationContext(), item.name, Toast.LENGTH_SHORT).show();
+			public void onClick(final View v) {
+				refreshLayout.autoRefreshing(true);
 			}
 		});
+		// 自动刷新（无动画）
+		findViewById(R.id.no_anim).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				refreshLayout.autoRefreshing(false);
+			}
+		});
+		// =================================
+
+
+		mAdapter = new SimpleAdapter(mData) {
+			@Override
+			protected void onConvert(BaseRecyclerViewHolder holder, String item, int position) {
+				super.onConvert(holder, item, position);
+				holder.itemView.setBackgroundResource(R.drawable.item_selector);
+			}
+		};
+		createData();
+
+		// 1.创建RecyclerView对象
+		mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+		mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+		mRecyclerView.setAdapter(mAdapter);
+		// 4.添加分割线
+		mRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), LinearLayoutManager.VERTICAL));
+		mAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.ItemOnClickListener<String>() {
+			@Override
+			public void onItemClick(View view, int position, String item) {
+				Toast.makeText(getApplicationContext(), item, Toast.LENGTH_SHORT).show();
+			}
+		});
+
+
 	}
 
 	private void refresh() {
@@ -79,13 +98,8 @@ public class RefreshActivity2 extends AppCompatActivity {
 			@Override
 			public void run() {
 				mData.clear();
-				for (int i = 64; i < 64 + 15; i++) {
-					String title = "刷新的数据：" + (char) i;
-					mData.add(new TypeItem(ItemTypeDivideActivity.CurrentAdapter.TYPE_NORMAL, title ));
-				}
-
-				SystemClock.sleep(5000);
-
+				createData();
+				SystemClock.sleep(1200);
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -95,5 +109,13 @@ public class RefreshActivity2 extends AppCompatActivity {
 				});
 			}
 		}).start();
+	}
+
+	private void createData() {
+		for (int i = 64; i < 64 + 15; i++) {
+			String title = "" + (char) i;
+			mData.add(index + " 下拉刷新-" + title);
+		}
+		index++;
 	}
 }

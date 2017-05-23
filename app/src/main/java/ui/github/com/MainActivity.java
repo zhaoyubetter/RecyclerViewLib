@@ -14,6 +14,7 @@ import ui.github.com.library.recycler.base.BaseRecyclerViewAdapter;
 import ui.github.com.library.recycler.base.BaseRecyclerViewHolder;
 import ui.github.com.library.recycler.decoration.Divider;
 import ui.github.com.ui.FloatHeader2Activity;
+import ui.github.com.ui.FloatHeader3Activity;
 import ui.github.com.ui.FloatHeaderActivity;
 import ui.github.com.ui.ItemTypeDivideActivity;
 import ui.github.com.ui.LoadMoreActivity;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 		datas.add(new ModelBean("条目与分割线", ItemTypeDivideActivity.class.getName()));
 		datas.add(new ModelBean("悬浮标题实现1(添加布局)", FloatHeaderActivity.class.getName()));
 		datas.add(new ModelBean("悬浮标题实现2(decoration)", FloatHeader2Activity.class.getName()));
+		datas.add(new ModelBean("悬浮标题实现3(by cz)", FloatHeader3Activity.class.getName()));
 		datas.add(new ModelBean("加载更多的实现", LoadMoreActivity.class.getName()));
 		datas.add(new ModelBean("下拉刷新与加载更多", SwipeRefreshActivity.class.getName()));
 		adapter.replaceData(datas);
